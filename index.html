@@ -1,0 +1,2556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CSS452 Bench Kit</title>
+<meta name="description" content="Offline cheat sheet, sketch builder and reference for the CSS452 ESP32 practical exam.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky bench header with tabs; cheat sheet = TOC rail + entry column; builder = control rail + live output; datasheet-style type */
+:root {
+  --bg: #EDF0EE; --surface: #FFFFFF; --sunk: #F4F6F5; --ink: #16201C; --muted: #59665F; --line: #D2D9D5; --line-strong: #B5BFBA;
+  --accent: #A3541A; --accent-soft: #F5E6D8; --on-accent: #FFFFFF;
+  --w-pwr: #C8322B; --w-gnd: #2A3430; --w-sig: #1F66AE; --part: #16201C; --led: #E0452F;
+  --ok: #2B7A4B; --warn: #9A620F; --err: #B3261E; --ok-soft: #E0F0E6; --warn-soft: #FBEFD9; --err-soft: #F9E0DD; --info-soft: #E2EBF4; --info: #2D5E8C;
+  --code-bg: #F7F8F6; --syn-kw: #8C3A0C; --syn-str: #1F6B4A; --syn-num: #1C5B92; --syn-com: #74807B; --syn-fn: #4A3C9E; --syn-const: #962862; --syn-pre: #6B5B10;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 6px;
+  --board: #1E3A6A; --board-ink: #EEF3FA; --module: #C7CDD3; --module-ink: #1E2A33;
+  --pin-io: #B9A21A; --pin-pwr: #1B97AC; --pin-adc1: #2C9A52; --pin-adc2: #86A81C; --pin-uart: #7466CC; --pin-spi: #D06E1C; --pin-i2c: #1E7448; --pin-flash: #4B5157; --pin-strap: #8B9095;
+  --pv-frame: #D2D9D5;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --board: #213F72; --board-ink: #EEF3FA; --module: #8E969E; --module-ink: #10171C;
+  --pin-io: #D8C24A; --pin-pwr: #4CC2D6; --pin-adc1: #5CC283; --pin-adc2: #B6D24C; --pin-uart: #A79DF1; --pin-spi: #F0994F; --pin-i2c: #4FAF7D; --pin-flash: #8C9399; --pin-strap: #A3A8AD;
+  --pv-frame: #3B4842;
+  --bg: #0E1412; --surface: #161D1A; --sunk: #121815; --ink: #E2E9E5; --muted: #95A39C; --line: #29342F; --line-strong: #3B4842;
+  --accent: #E58E4D; --accent-soft: #3A2616; --on-accent: #1B0E04;
+  --w-pwr: #F26A5E; --w-gnd: #A9B6B0; --w-sig: #6EA8E6; --part: #E2E9E5; --led: #FF7461;
+  --ok: #5DBB85; --warn: #E2A54B; --err: #F3786C; --ok-soft: #15291D; --warn-soft: #30240F; --err-soft: #391B18; --info-soft: #152437; --info: #8DB8E6;
+  --code-bg: #111815; --syn-kw: #F2A46A; --syn-str: #80D2A7; --syn-num: #8EC3F3; --syn-com: #6C7A74; --syn-fn: #B9A9FF; --syn-const: #F28CC3; --syn-pre: #D9C66B;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --board: #213F72; --board-ink: #EEF3FA; --module: #8E969E; --module-ink: #10171C;
+  --pin-io: #D8C24A; --pin-pwr: #4CC2D6; --pin-adc1: #5CC283; --pin-adc2: #B6D24C; --pin-uart: #A79DF1; --pin-spi: #F0994F; --pin-i2c: #4FAF7D; --pin-flash: #8C9399; --pin-strap: #A3A8AD;
+  --pv-frame: #3B4842;
+  --bg: #0E1412; --surface: #161D1A; --sunk: #121815; --ink: #E2E9E5; --muted: #95A39C; --line: #29342F; --line-strong: #3B4842;
+  --accent: #E58E4D; --accent-soft: #3A2616; --on-accent: #1B0E04;
+  --w-pwr: #F26A5E; --w-gnd: #A9B6B0; --w-sig: #6EA8E6; --part: #E2E9E5; --led: #FF7461;
+  --ok: #5DBB85; --warn: #E2A54B; --err: #F3786C; --ok-soft: #15291D; --warn-soft: #30240F; --err-soft: #391B18; --info-soft: #152437; --info: #8DB8E6;
+  --code-bg: #111815; --syn-kw: #F2A46A; --syn-str: #80D2A7; --syn-num: #8EC3F3; --syn-com: #6C7A74; --syn-fn: #B9A9FF; --syn-const: #F28CC3; --syn-pre: #D9C66B;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+a { color: var(--accent); }
+code { font-family: var(--f-mono); font-size: .86em; background: var(--sunk); border: 1px solid var(--line); border-radius: 4px; padding: 0 .3em; }
+h1, h2, h3, h4 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; }
+@media (max-width: 520px) { .wrap { padding-inline: 16px; } }
+
+/* ---------- header ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; padding-block: 12px; }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand h1 { font-size: 24px; font-weight: 700; letter-spacing: .01em; }
+.brand .course { font: 600 12px/1 var(--f-mono); letter-spacing: .08em; color: var(--on-accent); background: var(--accent); padding: 5px 7px; border-radius: 4px; }
+.exam { margin: 0; color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 14px; font-variant-numeric: tabular-nums; }
+.exam b { color: var(--ink); font-weight: 600; }
+.tabs { display: flex; gap: 4px; margin-left: auto; background: var(--sunk); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+.tabs button { border: 0; background: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+@media (max-width: 760px) { .tabs { margin-left: 0; width: 100%; } .tabs button { flex: 1; padding-inline: 6px; } }
+
+main { padding-block: 24px 64px; }
+
+/* ---------- shared bits ---------- */
+.eyebrow { font: 600 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tag { display: inline-block; font: 600 11px/1 var(--f-mono); letter-spacing: .04em; padding: 4px 7px; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--muted); background: var(--surface); }
+.tag.primary { border-color: var(--accent); color: var(--accent); }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-strong); background: var(--surface); padding: 5px 10px; border-radius: var(--r); cursor: pointer; font-size: 13px; font-weight: 600; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.solid { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.btn.solid:hover { filter: brightness(1.08); color: var(--on-accent); }
+.btn.small { padding: 3px 8px; font-size: 12px; }
+.btn.ghost { border-color: transparent; background: none; color: var(--muted); }
+.btn.ghost:hover { color: var(--err); }
+
+.codebox { border: 1px solid var(--line); border-radius: var(--r); background: var(--code-bg); min-width: 0; }
+.codebar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+.codebar .name { font: 600 12px/1.2 var(--f-mono); color: var(--muted); margin-right: auto; }
+.codebox pre { margin: 0; overflow: auto; padding: 12px 14px; font: 12.5px/1.55 var(--f-mono); tab-size: 2; }
+.codebox pre.limit { max-height: 560px; }
+.tok-com { color: var(--syn-com); font-style: italic; }
+.tok-str { color: var(--syn-str); }
+.tok-num { color: var(--syn-num); }
+.tok-kw { color: var(--syn-kw); font-weight: 600; }
+.tok-fn { color: var(--syn-fn); }
+.tok-const { color: var(--syn-const); }
+.tok-pre { color: var(--syn-pre); }
+
+.table-wrap { overflow-x: auto; }
+table.pins { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.pins th { text-align: left; font: 600 11px/1.2 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line-strong); }
+table.pins td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.pins td:first-child { font: 600 12.5px/1.4 var(--f-mono); white-space: nowrap; color: var(--accent); }
+
+svg.wiring { width: 100%; max-width: 560px; height: auto; display: block; }
+svg.wiring text { fill: var(--ink); font: 12px var(--f-body); }
+svg.wiring text.mono { font: 600 11.5px var(--f-mono); }
+svg.wiring text.small { fill: var(--muted); font-size: 11px; }
+svg.wiring .w-sig { stroke: var(--w-sig); stroke-width: 2.2; fill: none; stroke-linecap: round; }
+svg.wiring .w-pwr { stroke: var(--w-pwr); stroke-width: 2.2; fill: none; stroke-linecap: round; }
+svg.wiring .w-gnd { stroke: var(--w-gnd); stroke-width: 2.2; fill: none; stroke-linecap: round; }
+svg.wiring .part { stroke: var(--part); stroke-width: 1.8; fill: none; stroke-linejoin: round; }
+svg.wiring .led-body { stroke: var(--part); stroke-width: 1.8; fill: var(--led); fill-opacity: .28; }
+svg.wiring .led-ray { stroke: var(--led); stroke-width: 1.6; fill: none; }
+svg.wiring .dot { fill: var(--part); }
+svg.wiring .tag-gpio { fill: var(--surface); stroke: var(--w-sig); stroke-width: 1.6; }
+svg.wiring .tag-pwr { fill: var(--surface); stroke: var(--w-pwr); stroke-width: 1.6; }
+svg.wiring .tag-gnd { fill: var(--surface); stroke: var(--w-gnd); stroke-width: 1.6; }
+svg.wiring .open { fill: var(--surface); stroke: var(--w-sig); stroke-width: 2; }
+svg.wiring .note-text { fill: var(--muted); font: 600 11px var(--f-mono); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+
+.callout { border-radius: var(--r); padding: 10px 12px; font-size: 14px; border: 1px solid; }
+.callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+.callout.info { background: var(--info-soft); border-color: var(--info); }
+.callout b:first-child { margin-right: 4px; }
+
+/* ---------- cheat sheet ---------- */
+.cheat { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 32px; align-items: start; }
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 84px); max-height: calc(100vh - 110px); overflow: auto; font-size: 13.5px; padding-right: 4px; }
+.toc .g { margin-bottom: 14px; }
+.toc .g h4 { font-size: 15px; }
+.toc .g p { margin: 1px 0 6px; font-size: 12px; color: var(--muted); }
+.toc a { display: block; padding: 3px 0 3px 10px; border-left: 2px solid var(--line); color: var(--ink); text-decoration: none; }
+.toc a:hover { border-left-color: var(--accent); color: var(--accent); }
+.toc a small { color: var(--muted); font: 500 11px var(--f-mono); }
+.toc .opts { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 6px; }
+@media (max-width: 960px) { .cheat { grid-template-columns: minmax(0, 1fr); } .toc { position: static; max-height: none; } .toc .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 20px; } }
+
+.intro { display: grid; gap: 14px; margin-bottom: 28px; max-width: 900px; }
+.intro h2 { font-size: 30px; font-weight: 700; }
+.intro p { margin: 0; color: var(--muted); max-width: 70ch; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.facts div { background: var(--surface); padding: 10px 12px; }
+.facts dt { font: 600 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.facts dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.group-head { display: flex; align-items: baseline; gap: 12px; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+.group-head h2 { font-size: 26px; }
+.group-head span { color: var(--muted); font-size: 14px; }
+.group-head:first-of-type { margin-top: 0; }
+
+.entry { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px 20px; margin-bottom: 18px; display: grid; gap: 14px; scroll-margin-top: 90px; }
+.entry > header { display: grid; gap: 8px; }
+.entry .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.entry h3 { font-size: 22px; font-weight: 600; }
+.task { margin: 0; padding: 10px 12px; background: var(--sunk); border-radius: var(--r); border: 1px solid var(--line); max-width: 90ch; }
+.task .lbl { font: 600 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-right: 8px; }
+.entry-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 1100px) { .entry-grid { grid-template-columns: minmax(0, 1fr); } }
+.entry h4 { font-size: 13px; font-family: var(--f-mono); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.entry ul { margin: 0 0 14px; padding-left: 18px; display: grid; gap: 5px; }
+.entry ul:last-child { margin-bottom: 0; }
+.wiring-block { display: grid; gap: 10px; min-width: 0; }
+.wiring-block + .wiring-block { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.wiring-block .sub { font: 600 12px var(--f-mono); color: var(--accent); }
+.codes { display: grid; gap: 12px; }
+.codes.two { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); }
+@media (max-width: 520px) { .codes.two { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- builder ---------- */
+.builder { display: grid; grid-template-columns: 410px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 1000px) { .builder { grid-template-columns: minmax(0, 1fr); } }
+.controls { display: grid; gap: 10px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
+.panel h2 { font-size: 20px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: end; }
+.f { display: grid; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 600; min-width: 0; }
+.f input[type="number"], .f input[type="text"], .f select { width: 100%; min-width: 0; padding: 5px 7px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 400; }
+.f input[type="number"] { width: 84px; font-family: var(--f-mono); }
+.f.grow { flex: 1 1 140px; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; cursor: pointer; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+details.sec { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+details.sec > summary { list-style: none; cursor: pointer; padding: 11px 14px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+details.sec > summary::-webkit-details-marker { display: none; }
+details.sec > summary::after { content: "+"; margin-left: auto; font: 600 16px var(--f-mono); color: var(--muted); }
+details.sec[open] > summary::after { content: "–"; }
+details.sec > summary .state { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--line-strong); flex: none; }
+details.sec > summary .state.on { background: var(--ok); border-color: var(--ok); }
+details.sec > summary small { font-weight: 400; color: var(--muted); font-size: 12px; }
+details.sec .body { padding: 0 14px 14px; display: grid; gap: 10px; }
+.item { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; display: grid; gap: 8px; background: var(--sunk); }
+.item .row { align-items: center; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+.output { display: grid; gap: 14px; min-width: 0; }
+.warns { display: grid; gap: 6px; }
+.warn-item { display: flex; gap: 10px; align-items: flex-start; padding: 7px 10px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid; }
+.warn-item .lv { font: 700 10.5px/1.9 var(--f-mono); letter-spacing: .06em; flex: none; width: 46px; }
+.warn-item.err { background: var(--err-soft); border-color: var(--err); } .warn-item.err .lv { color: var(--err); }
+.warn-item.warn { background: var(--warn-soft); border-color: var(--warn); } .warn-item.warn .lv { color: var(--warn); }
+.warn-item.info { background: var(--info-soft); border-color: var(--info); } .warn-item.info .lv { color: var(--info); }
+.warn-item.ok { background: var(--ok-soft); border-color: var(--ok); } .warn-item.ok .lv { color: var(--ok); }
+.out-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 1250px) { .out-grid { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-width: 0; display: grid; gap: 10px; align-content: start; }
+.card h3 { font-size: 16px; }
+
+/* ---------- reference ---------- */
+.ref { display: grid; gap: 28px; }
+.ref section { display: grid; gap: 12px; }
+.ref h2 { font-size: 24px; padding-bottom: 6px; border-bottom: 2px solid var(--ink); }
+.ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+@media (max-width: 420px) { .ref-grid { grid-template-columns: minmax(0, 1fr); } }
+.check { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.check label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.check input { accent-color: var(--ok); width: 16px; height: 16px; margin-top: 3px; flex: none; }
+.check input:checked + span { color: var(--muted); text-decoration: line-through; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+table.pins tr.dim td { opacity: .32; }
+.yes { color: var(--ok); font-weight: 700; } .no { color: var(--muted); }
+.match { display: grid; gap: 4px; font: 13px var(--f-mono); }
+.match .y { color: var(--ok); } .match .n { color: var(--muted); }
+.foot { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 14px; max-width: 90ch; }
+
+@media (prefers-reduced-motion: no-preference) { .tabs button, .btn, .toc a { transition: background-color .15s, color .15s, border-color .15s; } }
+/* builder: two independently scrolling panels on wide screens */
+@media (min-width: 1001px) {
+  body.mode-builder main { padding-block: 14px; }
+  .builder { height: calc(100vh - var(--hdr, 64px) - 28px); height: calc(100dvh - var(--hdr, 64px) - 28px); }
+  .builder > .controls, .builder > .output { height: 100%; overflow-y: auto; overscroll-behavior: contain; padding-right: 8px; scrollbar-gutter: stable; align-content: start; }
+}
+.out-nav { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 8px; background: var(--bg); }
+.out-nav a { font: 600 12px var(--f-mono); text-decoration: none; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; background: var(--surface); }
+.out-nav a:hover { color: var(--accent); border-color: var(--accent); }
+.output > [id] { scroll-margin-top: 44px; }
+@media (max-width: 1000px) { .out-nav { position: static; } }
+.sel-bar { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 6px; background: var(--accent-soft); border: 1px solid var(--accent); font-size: 13.5px; }
+.sel-bar .btn { margin-left: auto; }
+
+/* code lines (clickable, highlightable) */
+#b-code { padding-inline: 0; }
+#b-code .lines { display: inline-block; min-width: 100%; }
+#b-code .ln { display: block; min-height: 1.55em; padding: 0 14px 0 11px; border-left: 3px solid transparent; cursor: pointer; }
+#b-code .ln:hover { background: var(--sunk); }
+#b-code.has-sel .ln { opacity: .42; }
+#b-code.has-sel .ln.hl { opacity: 1; background: var(--accent-soft); border-left-color: var(--accent); }
+.code-btn { border: 1px solid var(--line-strong); background: var(--surface); color: var(--muted); font: 600 11px/1 var(--f-mono); padding: 4px 6px; border-radius: 4px; cursor: pointer; flex: none; }
+.code-btn:hover, .code-btn[aria-pressed="true"] { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+summary .code-btn { margin-left: auto; }
+summary .code-btn + span.sp { display: none; }
+.item.sel, details.sec.sel { outline: 2px solid var(--accent); outline-offset: 1px; }
+.item .row:first-child .code-btn { margin-left: auto; }
+.item-head { display: flex; align-items: center; gap: 8px; }
+.item-head .code-btn { margin-left: auto; }
+
+/* pin inputs */
+.f input.pin-in { width: 84px; font-family: var(--f-mono); padding: 5px 7px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 400; }
+.pin-hint { font: 500 10.5px/1.2 var(--f-mono); color: var(--muted); min-height: 1.2em; max-width: 120px; }
+.pin-hint.bad { color: var(--err); }
+.f:has(.pin-hint.bad) input { border-color: var(--err); }
+
+/* wiring row highlight */
+svg.wiring .rowbg { fill: transparent; }
+svg.wiring .wrow.hl .rowbg { fill: var(--accent-soft); }
+
+/* board diagram */
+svg.board { width: 100%; min-width: 620px; height: auto; display: block; }
+svg.board text { font: 600 11px var(--f-mono); fill: var(--ink); }
+svg.board .b-board { fill: var(--board); }
+svg.board .b-module { fill: var(--module); }
+svg.board .b-shield { fill: none; stroke: var(--module-ink); stroke-opacity: .35; }
+svg.board .b-title { fill: var(--board-ink); font: 700 15px var(--f-display); }
+svg.board .b-mod { fill: var(--module-ink); font-size: 11px; }
+svg.board .b-small { fill: var(--board-ink); font-size: 9.5px; opacity: .85; }
+svg.board .b-hole { fill: var(--board-ink); }
+svg.board .b-led { fill: var(--led); }
+svg.board .b-btn { fill: var(--board-ink); fill-opacity: .9; }
+svg.board .b-usb { fill: var(--module); }
+svg.board .pb { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.2; }
+svg.board .pb.pwr { stroke: var(--pin-pwr); }
+svg.board .pb.flash { fill: var(--pin-flash); stroke: var(--pin-flash); }
+svg.board .pb.flash + text { fill: var(--surface); }
+svg.board .pb.strap { stroke: var(--pin-strap); stroke-dasharray: 3 2; }
+svg.board .pb.used { fill: var(--accent); stroke: var(--accent); }
+svg.board .pb.used + text { fill: var(--on-accent); }
+svg.board .chip { stroke-width: 1.2; fill-opacity: .2; }
+svg.board .c-adc1 { fill: var(--pin-adc1); stroke: var(--pin-adc1); }
+svg.board .c-adc2 { fill: var(--pin-adc2); stroke: var(--pin-adc2); }
+svg.board .c-uart { fill: var(--pin-uart); stroke: var(--pin-uart); }
+svg.board .c-spi { fill: var(--pin-spi); stroke: var(--pin-spi); }
+svg.board .c-i2c { fill: var(--pin-i2c); stroke: var(--pin-i2c); }
+svg.board .io { fill: var(--muted); font-size: 10px; }
+svg.board .role { fill: var(--accent); font: 700 11.5px var(--f-body); }
+svg.board .pinrow:hover .pb:not(.used) { stroke: var(--accent); stroke-width: 2; }
+.board-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+.board-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid; vertical-align: -2px; margin-right: 5px; }
+
+/* web page preview (looks like the real ESP32 page, so its colours are fixed) */
+.pv { border: 1px solid var(--pv-frame); border-radius: 10px; overflow: hidden; max-width: 520px; }
+.pv-url { display: flex; gap: 8px; align-items: center; padding: 7px 10px; background: var(--sunk); border-bottom: 1px solid var(--pv-frame); font: 12px var(--f-mono); color: var(--muted); }
+.pv-url b { color: var(--ink); font-weight: 600; }
+.pv-page { background: #FFFFFF; color: #000000; font-family: Helvetica, Arial, sans-serif; text-align: center; padding: 10px 12px 16px; }
+.pv-page h1 { font: 700 26px/1.2 Helvetica, Arial, sans-serif; margin: 10px 0 12px; color: #000000; }
+.pv-item { position: relative; padding: 4px 34px; border: 1px dashed transparent; border-radius: 6px; }
+.pv-item:hover { border-color: #C9CFCC; }
+.pv-move { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; gap: 2px; }
+.pv-move button, .pv-rmove button { width: 22px; height: 20px; border: 1px solid #B8C0BC; background: #F3F5F4; color: #333333; border-radius: 4px; cursor: pointer; font-size: 11px; line-height: 1; padding: 0; }
+.pv-move button:hover, .pv-rmove button:hover { background: #E3E8E6; }
+.pv-move button:disabled, .pv-rmove button:disabled { opacity: .3; cursor: default; }
+.pv-page table { border-collapse: collapse; margin: 0 auto; }
+.pv-page th, .pv-page td { border: 1px solid #000000; padding: 6px 20px; font-size: 16px; color: #000000; }
+.pv-page td.rm { border: 0; padding: 0 0 0 6px; }
+.pv-rmove { display: flex; gap: 2px; }
+.pv-page p { margin: 6px 0; font-size: 15px; color: #000000; }
+.pv-btn { background: #4CAF50; border: none; color: #FFFFFF; padding: 10px 28px; font-size: 19px; margin: 2px; cursor: pointer; font-family: Helvetica, Arial, sans-serif; }
+.pv-btn.off { background: #555555; }
+.pv-btn.alloff { background: #C0392B; }
+.wake-row { padding: 6px 10px; }
+.pv-req { font: 12px/1.5 var(--f-mono); color: var(--muted); }
+.pv-req b { color: var(--accent); }
+.pv-sim { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.pv-sim input { accent-color: var(--accent); flex: 1; max-width: 240px; }
+
+@media print {
+  .top, .toc, .codebar button, #tab-builder, #tab-ref { display: none !important; }
+  .cheat { display: block; } .entry { break-inside: avoid-page; border: 0; padding: 0 0 12px; }
+  body { background: #fff; } .codebox pre.limit { max-height: none; }
+}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="course">CSS452</span><h1>Bench Kit</h1></div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" id="t-cheat" aria-controls="tab-cheat" aria-selected="true" data-tab="cheat">Cheat sheet</button>
+      <button role="tab" id="t-builder" aria-controls="tab-builder" aria-selected="false" data-tab="builder">Builder</button>
+      <button role="tab" id="t-ref" aria-controls="tab-ref" aria-selected="false" data-tab="ref">Reference</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ================= CHEAT SHEET ================= -->
+  <section id="tab-cheat" role="tabpanel" aria-labelledby="t-cheat">
+    <div class="cheat">
+      <aside class="toc" aria-label="Contents">
+        <div class="groups" id="toc"></div>
+        <div class="opts">
+          <label class="chk"><input type="checkbox" id="cheat-explain" checked> Explain lines in code</label>
+          <label class="f">PWM syntax
+            <select id="cheat-pwm"><option value="v3">ESP32 core 3.x (ledcAttach)</option><option value="v2">ESP32 core 2.x (ledcSetup)</option></select>
+          </label>
+        </div>
+      </aside>
+      <div>
+        <div class="intro">
+          <h2>Every exercise and homework, wired and explained</h2>
+          <p>Each card shows the task, the circuit, what to remember, and the full sketch. “Open in builder” loads it as a starting point so you can change pins, timings or add features and get new code.</p>
+          <dl class="facts">
+            <div><dt>Scope</dt><dd>Lecture Notes 3–6 · Ex 1–4 · HW 1–4</dd></div>
+            <div><dt>Baud rate</dt><dd>115200</dd></div>
+            <div><dt>Button logic</dt><dd>pressed = LOW</dd></div>
+            <div><dt>LED logic</dt><dd>HIGH = on</dd></div>
+          </dl>
+        </div>
+        <div id="entries"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BUILDER ================= -->
+  <section id="tab-builder" role="tabpanel" aria-labelledby="t-builder" hidden>
+    <div class="builder">
+      <div class="controls" id="controls"></div>
+      <div class="output">
+        <nav class="out-nav" aria-label="Jump to"><a href="#b-codebox" data-go="b-codebox">Code</a><a href="#b-wirecard" data-go="b-wirecard">Wiring</a><a href="#b-webcard" data-go="b-webcard" id="nav-web" hidden>Web page</a><a href="#b-boardcard" data-go="b-boardcard">Board pins</a></nav>
+        <div class="warns" id="warns" aria-live="polite"></div>
+        <div class="sel-bar" id="sel-bar" hidden></div>
+        <div class="codebox" id="b-codebox">
+          <div class="codebar"><span class="name" id="b-codename">sketch.ino</span>
+            <button class="btn small" id="b-dl" hidden>Save .ino</button>
+            <button class="btn small solid" id="b-copy">Copy code</button></div>
+          <pre id="b-code"></pre>
+        </div>
+        <div class="card" id="b-webcard" hidden><h3>Web page preview</h3>
+          <p class="hint">What the browser shows at the ESP32's IP. Use ↑ ↓ to reorder the table and buttons; the code follows. Click ON/OFF to see the request it sends.</p>
+          <div id="b-websim"></div><div id="b-web"></div><div class="pv-req" id="pv-req"></div></div>
+        <div class="card" id="b-wirecard"><h3>Wiring</h3><div id="b-wiring"></div><div id="b-pins" class="table-wrap"></div></div>
+        <div class="card" id="b-boardcard"><h3>ESPino32 pins in use</h3><div id="b-board" class="table-wrap"></div><div class="board-legend" id="b-legend"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REFERENCE ================= -->
+  <section id="tab-ref" role="tabpanel" aria-labelledby="t-ref" hidden>
+    <div class="ref" id="ref"></div>
+  </section>
+</main>
+
+<script>/* ===================== CSS452 sketch generator (pure functions, no DOM) ===================== */
+const PINS = {
+  VALID: [0,1,2,3,4,5,12,13,14,15,16,17,18,19,21,22,23,25,26,27,32,33,34,35,36,39],
+  INPUT_ONLY: [34,35,36,37,38,39],
+  FLASH: [6,7,8,9,10,11],
+  ADC1: [32,33,34,35,36,37,38,39],
+  ADC2: [0,2,4,12,13,14,15,25,26,27],
+  TOUCH: [0,2,4,12,13,14,15,27,32,33],
+  RTC: [0,2,4,12,13,14,15,25,26,27,32,33,34,35,36,37,38,39],
+  STRAP: [0,2,5,12,15],
+  UART: [1,3],
+};
+const TOUCH_T = {4:'T0',0:'T1',2:'T2',15:'T3',13:'T4',12:'T5',14:'T6',27:'T7',33:'T8',32:'T9'};
+const TOUCH_PIN = {0:4,1:0,2:2,3:15,4:13,5:12,6:14,7:27,8:33,9:32};
+// Arduino analog names on the ESP32 / ESPino32 (A1, A2, A8, A9 do not exist)
+const ANALOG_PIN = {0:36,3:39,4:32,5:33,6:34,7:35,10:4,11:0,12:2,13:15,14:13,15:12,16:14,17:27,18:25,19:26};
+const GPIO_ANALOG = Object.fromEntries(Object.entries(ANALOG_PIN).map(([a, g]) => [g, 'A' + a]));
+const ADC_CH = {36:'1.0',39:'1.3',32:'1.4',33:'1.5',34:'1.6',35:'1.7',4:'2.0',0:'2.1',2:'2.2',15:'2.3',13:'2.4',12:'2.5',14:'2.6',27:'2.7',25:'2.8',26:'2.9'};
+
+// ThaiEasyElec ESPino32 headers, top to bottom (null = gap between the two header blocks)
+const BOARD = {
+  left: ['GND','3V3','EN',36,39,32,33,34,35,4,null,0,2,15,13,12,14,27,25,26,'Vin'],
+  right: ['3V3','GND',22,21,1,3,17,16,18,19,null,23,5,9,10,11,6,7,8,'GND','VBAT'],
+  func: {22:['SCL','i2c'],21:['SDA','i2c'],1:['U0TXD','uart'],3:['U0RXD','uart'],17:['U2TXD','uart'],16:['U2RXD','uart'],18:['SCK','spi'],19:['MISO','spi'],23:['MOSI','spi'],5:['SS','spi'],9:['U1RXD','uart'],10:['U1TXD','uart']},
+};
+
+function resolvePin(raw) {
+  const s = String(raw ?? '').trim().toUpperCase().replace(/\s+/g, '');
+  if (s === '') return { err: 'A pin field is empty.' };
+  let m;
+  if ((m = /^A(\d{1,2})$/.exec(s))) {
+    const g = ANALOG_PIN[+m[1]];
+    return g === undefined ? { err: `${s} does not exist on the ESP32. Analog names are A0, A3–A7 and A10–A19.` } : { gpio: g, alias: s };
+  }
+  if ((m = /^T(\d)$/.exec(s))) return { gpio: TOUCH_PIN[+m[1]], alias: s };
+  if (s === 'VP') return { gpio: 36, alias: null };
+  if (s === 'VN') return { gpio: 39, alias: null };
+  if ((m = /^(?:GPIO|IO|D|G)?(\d{1,2})$/.exec(s))) return { gpio: +m[1], alias: null };
+  return { err: `"${raw}" is not a pin name. Use a GPIO number (33) or an analog name (A5).` };
+}
+function pinInfo(g) {
+  if (g == null || isNaN(g)) return '';
+  const bits = ['GPIO' + g];
+  if (GPIO_ANALOG[g]) bits.push(GPIO_ANALOG[g]);
+  if (ADC_CH[g]) bits.push((ADC_CH[g][0] === '1' ? 'ADC1 ch' : 'ADC2 ch') + ADC_CH[g].slice(2));
+  if (TOUCH_T[g]) bits.push('touch ' + TOUCH_T[g]);
+  if (PINS.INPUT_ONLY.includes(g)) bits.push('input only');
+  if (PINS.FLASH.includes(g)) bits.push('flash: do not use');
+  if (PINS.UART.includes(g)) bits.push('USB serial');
+  if (!PINS.VALID.includes(g) && !PINS.FLASH.includes(g)) return `GPIO${g} does not exist`;
+  return bits.join(' · ');
+}
+
+function mqttMatch(filter, topic) {
+  const fp = String(filter).split('/'), tp = String(topic).split('/');
+  for (let i = 0; i < fp.length; i++) {
+    if (fp[i] === '#') return i === fp.length - 1;
+    if (i >= tp.length) return false;
+    if (fp[i] !== '+' && fp[i] !== tp[i]) return false;
+  }
+  return fp.length === tp.length;
+}
+
+function blankConfig() {
+  return {
+    explain: true, pwmApi: 'v3', run: 'loop', showCore: false, studentId: '',
+    holds: [], toggles: [], blinks: [],
+    pwm: { on: false, pot: 36, led: 17, freq: 5000, res: 8 },
+    potLed: { on: false, pot: 36, led: 26, thr: 500, ledLow: false },
+    sensors: { on: false, pot: false, potPin: 36, touch: false, touchPin: 32, hall: false, interval: false, ms: 1000 },
+    touch: { on: false, pin: 32, thr: 20, action: 'restart', led: 17 },
+    sleep: { on: false, trigger: 'delay', delayS: 10, btn: 26, wake: 'timer', timerS: 5, ext0Pin: 32, ext0Level: 'LOW',
+             ext1Pins: '2,32', ext1Mode: 'ANY_HIGH', touchPin: 32, touchThr: 40, bootCount: true, reason: false, ledsOff: false },
+    wifi: { on: false, mode: 'STA', ssid: 'Your SSID', pass: 'Your Password' },
+    ntp: { on: false, gmt: 7, ms: 1000, disconnect: true },
+    web: { on: false, title: 'ESP32 Web Server', pot: false, potPin: 36, volt: false, touch: false, touchPin: 32, btn: false, btnPin: 34, uptime: false, allOff: false,
+           outputs: [], refresh: 0, order: [], rowOrder: [] },
+    ts: { on: false, key: 'YOUR_WRITE_API_KEY', ms: 15000, f1: 'pot', f2: 'random', f3: 'none', potPin: 36 },
+    mqtt: { on: false, server: 'broker.hivemq.com', port: 1883, clientId: 'Client_YourStudentID',
+            pub: false, pubTopic: 'IoT/PotenValue_YourStudentID', pubSrc: 'pot', pubPin: 36, pubMs: 2000,
+            sub: false, subTopic: 'IoT/PotenValue_YourStudentID', subAction: 'threshold', subLed: 26, subThr: 500, subLedLow: false,
+            routes: [], status: false, statusTopic: 'IoT/status_YourStudentID', statusMsg: 'online' },
+  };
+}
+
+function isObj(v) { return v && typeof v === 'object' && !Array.isArray(v); }
+function deepMerge(a, b) {
+  for (const k in b) {
+    if (isObj(b[k]) && isObj(a[k])) deepMerge(a[k], b[k]);
+    else a[k] = b[k];
+  }
+  return a;
+}
+function makeConfig(over) { return deepMerge(blankConfig(), JSON.parse(JSON.stringify(over || {}))); }
+
+const PIN_KEYS = new Set(['btn', 'led', 'pot', 'potPin', 'touchPin', 'pin', 'ext0Pin', 'subLed', 'pubPin', 'btnPin']);
+const NUM_KEYS = /^(ms|thr|freq|res|delayS|timerS|touchThr|gmt|refresh|port|pubMs|subThr|minMs|maxMs)$/;
+function coerce(o) {
+  if (Array.isArray(o)) { o.forEach(coerce); return o; }
+  if (isObj(o)) for (const k in o) {
+    if (isObj(o[k]) || Array.isArray(o[k])) coerce(o[k]);
+    else if (NUM_KEYS.test(k) && o[k] !== '' && !isNaN(+o[k])) o[k] = +o[k];
+  }
+  return o;
+}
+
+// Lines carry block tags as \u0001id\u0001 suffixes; finalize strips them into a parallel array.
+function finalizeCode(code, explain) {
+  const rows = [];
+  for (let line of code.split('\n')) {
+    const tags = [];
+    line = line.replace(/\u0001([^\u0001]*)\u0001/g, (_, t) => { t.split(' ').filter(Boolean).forEach(x => { if (!tags.includes(x)) tags.push(x); }); return ''; });
+    const i = line.indexOf('//!');
+    if (i >= 0) {
+      if (!explain) {
+        const before = line.slice(0, i).replace(/\s+$/, '');
+        if (before.trim() === '') continue;
+        line = before;
+      } else line = line.slice(0, i) + '//' + line.slice(i + 3);
+    }
+    rows.push({ text: line, tags });
+  }
+  const out = [];
+  for (const r of rows) {
+    const blank = r.text.trim() === '';
+    if (blank && (!out.length || out[out.length - 1].text.trim() === '')) continue;
+    out.push(blank ? { text: '', tags: [] } : r);
+  }
+  while (out.length && out[out.length - 1].text === '') out.pop();
+  return { code: out.map(r => r.text).join('\n') + '\n', lineTags: out.map(r => r.tags) };
+}
+
+function generate(input) {
+  const c = coerce(makeConfig(input));
+  const W = [];
+  const warn = (lvl, msg) => { if (!W.some(w => w.msg === msg)) W.push({ lvl, msg }); };
+
+  // ---------- resolve pin names (33, GPIO33, A5, T9 ...) ----------
+  const typed = {};
+  (function walk(o) {
+    if (Array.isArray(o)) return o.forEach(walk);
+    if (!isObj(o)) return;
+    for (const k in o) {
+      if (isObj(o[k]) || Array.isArray(o[k])) walk(o[k]);
+      else if (PIN_KEYS.has(k) && typeof o[k] !== 'boolean') {
+        const r = resolvePin(o[k]);
+        if (r.err) { warn('err', r.err); o[k] = -1; }
+        else { o[k] = r.gpio; if (r.alias) typed[r.gpio] = r.alias; }
+      }
+    }
+  })(c);
+  // Only analog inputs keep the analog name in code (analogRead(A5)); other pins are written as GPIO numbers.
+  const pinExpr = (g, kind) => (kind === 'pot' ? (typed[g] && /^A/.test(typed[g]) ? typed[g] : g === 36 ? 'A0' : String(g)) : String(g));
+
+  // ---------- block tagging ----------
+  let cur = '';
+  const tagLine = s => s + '\u0001' + cur + '\u0001';
+  const arr = () => {
+    const a = [];
+    const tag = x => (Array.isArray(x) ? x.map(tagLine) : tagLine(x));
+    a.push = (...xs) => Array.prototype.push.apply(a, xs.map(tag));
+    a.unshift = (...xs) => Array.prototype.unshift.apply(a, xs.map(tag));
+    return a;
+  };
+  const at = (id, fn) => { const prev = cur; cur = id; try { fn(); } finally { cur = prev; } };
+
+  const uses = [];
+  const use = (pin, mode, role) => uses.push({ pin: +pin, mode, role });
+  const sid = String(c.studentId || '').trim();
+  const S = s => (sid ? String(s).split('YourStudentID').join(sid) : String(s));
+  const ON = low => (low ? 'LOW' : 'HIGH');
+  const OFF = low => (low ? 'HIGH' : 'LOW');
+  const q = s => String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+  const mq = c.mqtt;
+  const mqttPub = mq.on && mq.pub, mqttSub = mq.on && mq.sub;
+  const needNet = c.web.on || c.ts.on || mq.on || c.ntp.on || c.wifi.on;
+  const needInternet = c.ts.on || mq.on || c.ntp.on;
+  const tasksMode = c.run !== 'loop';
+  const ap = c.wifi.mode === 'AP';
+  const sl = c.sleep;
+
+  // ---------- naming: LEDs ----------
+  const leds = [];
+  const addLed = (pin, low, role, block) => {
+    pin = +pin;
+    let l = leds.find(x => x.pin === pin);
+    if (!l) { l = { pin, low: !!low, roles: [], blocks: [] }; leds.push(l); }
+    l.roles.push(role); l.blocks.push(block);
+  };
+  c.blinks.forEach((b, i) => addLed(b.led, b.ledLow, 'blink', 'blink-' + i));
+  c.holds.forEach((h, i) => addLed(h.led, h.ledLow, 'hold', 'hold-' + i));
+  c.toggles.forEach((t, i) => addLed(t.led, t.ledLow, 'toggle', 'toggle-' + i));
+  if (c.pwm.on) addLed(c.pwm.led, false, 'pwm', 'pwm');
+  if (c.potLed.on) addLed(c.potLed.led, c.potLed.ledLow, 'potLed', 'potLed');
+  if (c.touch.on && c.touch.action === 'led') addLed(c.touch.led, false, 'touchLed', 'touch');
+  const routes = mqttSub ? (mq.routes || []) : [];
+  if (mqttSub && !routes.length) addLed(mq.subLed, mq.subAction === 'pwm' ? false : mq.subLedLow, mq.subAction === 'pwm' ? 'mqttPwm' : 'mqtt', 'mqtt-sub');
+  routes.forEach((r, i) => addLed(r.led, r.action === 'pwm' ? false : r.ledLow, r.action === 'pwm' ? 'mqttPwm' : 'mqtt', 'mqtt-route-' + i));
+  const ledIdx = pin => leds.findIndex(l => l.pin === +pin);
+  const ledName = pin => (leds.length === 1 ? 'ledPin' : `led${ledIdx(pin) + 1}Pin`);
+  const ledLabel = pin => (leds.length === 1 ? 'LED' : `LED${ledIdx(pin) + 1}`);
+  const ledState = pin => (leds.length === 1 ? 'ledState' : `led${ledIdx(pin) + 1}State`);
+  const ledLow = pin => (leds.find(l => l.pin === +pin) || {}).low;
+  leds.forEach(l => {
+    const pwmRole = l.roles.some(r => r === 'pwm' || r === 'mqttPwm');
+    if (l.roles.length > 1) warn('warn', `GPIO${l.pin} drives one LED from ${l.roles.length} blocks (${l.roles.join(', ')}). They will fight over it; give each block its own LED unless that is intended.`);
+    if (pwmRole && l.roles.length > 1) warn('err', `GPIO${l.pin} is a PWM LED and a digital LED at the same time. Use a different pin for one of them.`);
+  });
+
+  // ---------- naming: buttons ----------
+  const btns = [];
+  const addBtn = (pin, role, block) => {
+    pin = +pin;
+    let b = btns.find(x => x.pin === pin);
+    if (!b) { b = { pin, roles: [], blocks: [] }; btns.push(b); }
+    b.roles.push(role); b.blocks.push(block);
+  };
+  c.holds.forEach((h, i) => addBtn(h.btn, 'hold', 'hold-' + i));
+  c.toggles.forEach((t, i) => addBtn(t.btn, 'toggle', 'toggle-' + i));
+  if (sl.on && sl.trigger === 'button') addBtn(sl.btn, 'sleep', 'sleep');
+  if (mqttPub && mq.pubSrc === 'button') addBtn(mq.pubPin, 'mqtt', 'mqtt-pub');
+  if (c.web.on && c.web.btn) addBtn(c.web.btnPin, 'web', 'web-table');
+  const btnName = pin => { const i = btns.findIndex(b => b.pin === +pin); return i === 0 ? 'buttonPin' : `sw${i}Pin`; };
+  const btnLabel = pin => { const i = btns.findIndex(b => b.pin === +pin); return i === 0 ? 'SW' : `SW${i}`; };
+
+  // ---------- naming: pots & touch ----------
+  const pots = [];
+  const addPot = (p, block) => { p = +p; let x = pots.find(o => o.pin === p); if (!x) { x = { pin: p, blocks: [] }; pots.push(x); } x.blocks.push(block); };
+  c.blinks.forEach((b, i) => { if (b.potOn) addPot(b.pot, 'blink-' + i); });
+  if (c.pwm.on) addPot(c.pwm.pot, 'pwm');
+  if (c.potLed.on) addPot(c.potLed.pot, 'potLed');
+  if (c.sensors.on && c.sensors.pot) addPot(c.sensors.potPin, 'sensors');
+  if (c.web.on && (c.web.pot || c.web.volt)) addPot(c.web.potPin, 'web-table');
+  if (c.ts.on && [c.ts.f1, c.ts.f2, c.ts.f3].includes('pot')) addPot(c.ts.potPin, 'ts');
+  if (mqttPub && mq.pubSrc === 'pot') addPot(mq.pubPin, 'mqtt-pub');
+  const potName = p => (pots.length === 1 ? 'potPin' : `pot${pots.findIndex(o => o.pin === +p) + 1}Pin`);
+
+  const touches = [];
+  const addTouch = (p, block) => { p = +p; let x = touches.find(o => o.pin === p); if (!x) { x = { pin: p, blocks: [] }; touches.push(x); } x.blocks.push(block); };
+  if (c.touch.on) addTouch(c.touch.pin, 'touch');
+  if (c.sensors.on && c.sensors.touch) addTouch(c.sensors.touchPin, 'sensors');
+  if (c.web.on && c.web.touch) addTouch(c.web.touchPin, 'web-table');
+  if (mqttPub && mq.pubSrc === 'touch') addTouch(mq.pubPin, 'mqtt-pub');
+  if (c.ts.on && [c.ts.f1, c.ts.f2, c.ts.f3].includes('touch') && !touches.length) addTouch(32, 'ts');
+  const touchName = p => (touches.length === 1 ? 'touchPin' : `touch${touches.findIndex(o => o.pin === +p) + 1}Pin`);
+
+  // ---------- code sections ----------
+  const inc = arr(), gPins = arr(), gNet = arr(), gState = arr(), fns = arr(), setup = arr(), loopBody = arr(), taskCreates = arr();
+  const addInc = s => { if (!inc.some(x => x.startsWith(s))) inc.push(s); };
+  let needMillis = false;
+
+  btns.forEach(b => at(b.blocks.join(' '), () => gPins.push(`const int ${btnName(b.pin)} = ${pinExpr(b.pin)};  //! push button ${btnLabel(b.pin)}${typed[b.pin] ? ' (' + typed[b.pin] + ' = GPIO' + b.pin + ')' : ''} (10k pull-up -> not pressed = HIGH, pressed = LOW)`)));
+  pots.forEach(p => at(p.blocks.join(' '), () => gPins.push(`const int ${potName(p.pin)} = ${pinExpr(p.pin, 'pot')};  //! potentiometer wiper: ${pinInfo(p.pin)}`)));
+  touches.forEach(p => at(p.blocks.join(' '), () => gPins.push(`const int ${touchName(p.pin)} = ${pinExpr(p.pin)};  //! bare wire on a touch pin (${TOUCH_T[p.pin] || 'not a touch pin!'})`)));
+  leds.forEach(l => at(l.blocks.join(' '), () => gPins.push(`const int ${ledName(l.pin)} = ${pinExpr(l.pin)};  //! ${ledLabel(l.pin)}${typed[l.pin] ? ' (' + typed[l.pin] + ' = GPIO' + l.pin + ')' : ''}${l.low ? ' (active LOW: LOW = on)' : ''}`)));
+
+  at('global', () => setup.push('Serial.begin(115200);  //! must match the Serial Monitor baud rate'));
+
+  // ---------- deep sleep (globals + wake sources) ----------
+  let sleepStandalone = false;
+  const wakePins = [];
+  if (sl.on) at('sleep', () => {
+    if (sl.bootCount) gState.push('RTC_DATA_ATTR int bootCount = 0;  //! RTC memory survives deep sleep; normal variables are reset');
+    const wk = {
+      timer: sl.wTimer ?? sl.wake === 'timer', ext0: sl.wExt0 ?? sl.wake === 'ext0',
+      ext1: sl.wExt1 ?? sl.wake === 'ext1', touch: sl.wTouch ?? sl.wake === 'touch',
+    };
+    const nWake = Object.values(wk).filter(Boolean).length;
+    if (nWake > 1) setup.push('//! Several wake-up sources: whichever happens first wakes the ESP32');
+    if (wk.ext0 && wk.touch) warn('err', 'ext0 and touch wake-up cannot be used together on the ESP32. Use ext1 for the button, or drop one of them.');
+    if (wk.timer) {
+      gState.push(`#define TIME_TO_SLEEP ${sl.timerS}  //! seconds asleep before the timer wakes the ESP32`);
+      setup.push('esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * 1000000ULL);  //! takes MICROseconds, so seconds x 1,000,000');
+    }
+    if (wk.ext0) {
+      const lvl = sl.ext0Level === 'HIGH' ? 'HIGH' : 'LOW';
+      setup.push(`esp_sleep_enable_ext0_wakeup(GPIO_NUM_${sl.ext0Pin}, ${lvl});  //! wake when GPIO${sl.ext0Pin} becomes ${lvl} (${lvl === 'LOW' ? 'button with pull-up pressed' : 'button with pull-down pressed'})`);
+      use(sl.ext0Pin, 'WAKE', 'ext0 wake-up');
+      wakePins.push({ pin: +sl.ext0Pin, pull: lvl === 'LOW' ? 'up' : 'down' });
+      if (!PINS.RTC.includes(+sl.ext0Pin)) warn('err', `ext0 wake-up needs an RTC GPIO (0, 2, 4, 12–15, 25–27, 32–39). GPIO${sl.ext0Pin} is not one.`);
+    }
+    if (wk.ext1) {
+      const ps = [];
+      String(sl.ext1Pins).split(/[ ,;]+/).filter(Boolean).forEach(t => { const r = resolvePin(t); if (r.err) warn('err', 'ext1 pins: ' + r.err); else ps.push(r.gpio); });
+      let mask = 0n;
+      ps.forEach(p => { mask += 1n << BigInt(p); });
+      const mode = sl.ext1Mode === 'ALL_LOW' ? 'ESP_EXT1_WAKEUP_ALL_LOW' : 'ESP_EXT1_WAKEUP_ANY_HIGH';
+      const hex = '0x' + mask.toString(16).toUpperCase();
+      setup.push(`esp_sleep_enable_ext1_wakeup(${hex}, ${mode});  //! bitmask = ${ps.map(p => '2^' + p).join(' + ') || '(no pins)'}; ${mode.endsWith('ANY_HIGH') ? 'wake if ANY of these pins is HIGH' : 'wake when ALL of these pins are LOW'}`);
+      ps.forEach(p => {
+        use(p, 'WAKE', 'ext1 wake-up');
+        wakePins.push({ pin: p, pull: mode.endsWith('ANY_HIGH') ? 'down' : 'up' });
+        if (!PINS.RTC.includes(p)) warn('err', `ext1 wake-up needs RTC GPIOs (0, 2, 4, 12–15, 25–27, 32–39). GPIO${p} is not one.`);
+      });
+      if (!ps.length) warn('err', 'ext1 wake-up has no pins. List them like "2,32".');
+      if (mode.endsWith('ANY_HIGH')) warn('info', 'ext1 ANY_HIGH: wire each wake button with a 10k pull-DOWN to GND and the switch to 3V3, so pressing makes the pin HIGH.');
+    }
+    if (wk.touch) {
+      const cb = mqttSub ? 'touchWakeCallback' : 'callback';
+      gState.push(`#define Threshold ${sl.touchThr}  //! touch value below this wakes the ESP32 (higher = more sensitive)`);
+      fns.push([`void ${cb}() {  //! placeholder: touchAttachInterrupt needs a function, even an empty one`, '}']);
+      setup.push(`touchAttachInterrupt(${sl.touchPin}, ${cb}, Threshold);  //! GPIO${sl.touchPin} = ${TOUCH_T[sl.touchPin] || 'NOT a touch pin'}`);
+      setup.push('esp_sleep_enable_touchpad_wakeup();');
+      use(sl.touchPin, 'TOUCH', 'touch wake-up');
+      wakePins.push({ pin: +sl.touchPin, pull: 'touch' });
+      if (!PINS.TOUCH.includes(+sl.touchPin)) warn('err', `Touch wake-up needs a touch pin (0, 2, 4, 12–15, 27, 32, 33). GPIO${sl.touchPin} is not one.`);
+    }
+    if (!nWake) warn('warn', 'Deep sleep has no wake-up source, so only the EN/RESET button will wake it.');
+    if (sl.bootCount) {
+      setup.push('delay(1000);  //! time to open the Serial Monitor');
+      setup.push('++bootCount;  //! counts how many times we have booted (survives sleep)');
+      setup.push('Serial.println("Boot number: " + String(bootCount));');
+    }
+    if (sl.reason || nWake > 1) {
+      setup.push('print_wakeup_reason();  //! which source woke us up?');
+      fns.push([
+        'void print_wakeup_reason() {',
+        '  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();',
+        '  switch (wakeup_reason) {',
+        '    case ESP_SLEEP_WAKEUP_EXT0:     Serial.println("Wakeup caused by external signal using RTC_IO (ext0)"); break;',
+        '    case ESP_SLEEP_WAKEUP_EXT1:     Serial.println("Wakeup caused by external signal using RTC_CNTL (ext1)"); break;',
+        '    case ESP_SLEEP_WAKEUP_TIMER:    Serial.println("Wakeup caused by timer"); break;',
+        '    case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println("Wakeup caused by touchpad"); break;',
+        '    default: Serial.printf("Wakeup was not caused by deep sleep: %d\\n", wakeup_reason); break;',
+        '  }',
+        '}',
+      ]);
+    }
+  });
+
+  // ---------- pin modes ----------
+  btns.forEach(b => at(b.blocks.join(' '), () => setup.push(`pinMode(${btnName(b.pin)}, INPUT);  //! external 10k pull-up to 3V3 (GPIO34-39 have no internal pull-ups)`)));
+  leds.forEach(l => {
+    if (l.roles.includes('pwm') || l.roles.includes('mqttPwm')) return;
+    at(l.blocks.join(' '), () => {
+      setup.push(`pinMode(${ledName(l.pin)}, OUTPUT);`);
+      setup.push(`digitalWrite(${ledName(l.pin)}, ${OFF(l.low)});  //! start with ${ledLabel(l.pin)} off`);
+    });
+  });
+  btns.forEach(b => use(b.pin, 'INPUT', b.roles.join(' + ')));
+  leds.forEach(l => use(l.pin, l.roles.some(r => r === 'pwm' || r === 'mqttPwm') ? 'PWM' : 'OUTPUT', l.roles.join(' + ')));
+  pots.forEach(p => use(p.pin, 'ANALOG', 'potentiometer'));
+  touches.forEach(p => use(p.pin, 'TOUCH', 'touch'));
+
+  // ---------- PWM helpers ----------
+  const pwmAttach = (pinExprS, chan) => (c.pwmApi === 'v2'
+    ? [`ledcSetup(${chan}, freq, resolution);  //! core 2.x: configure PWM channel`, `ledcAttachPin(${pinExprS}, ${chan});  //! connect the channel to the LED pin`]
+    : [`ledcAttach(${pinExprS}, freq, resolution);  //! core 3.x: set up PWM on this pin in one call`]);
+  const pwmWrite = (pinExprS, chan, val) => (c.pwmApi === 'v2' ? `ledcWrite(${chan}, ${val});  //! core 2.x writes to the CHANNEL` : `ledcWrite(${pinExprS}, ${val});  //! core 3.x writes to the PIN`);
+  let pwmGlobals = false;
+  const addPwmGlobals = () => {
+    if (pwmGlobals) return; pwmGlobals = true;
+    gState.push(`const int freq = ${c.pwm.freq || 5000};  //! PWM frequency in Hz (5 kHz is fine for an LED)`);
+    gState.push(`const int resolution = ${c.pwm.res || 8};  //! 8-bit -> duty cycle 0..255`);
+  };
+
+  // ---------- holds ----------
+  const singleHold = c.holds.length === 1;
+  if (singleHold) at('hold-0', () => gState.push('int buttonState = 0;  //! last value read from the button'));
+  const holdBody = h => {
+    const bn = btnName(h.btn), ln = ledName(h.led), low = ledLow(h.led);
+    if (singleHold) {
+      return [
+        `buttonState = digitalRead(${bn});  //! HIGH = not pressed, LOW = pressed`,
+        ...(h.print ? ['Serial.println(buttonState);'] : []),
+        'if (buttonState == LOW) {',
+        `  digitalWrite(${ln}, ${ON(low)});  //! pressed -> ${ledLabel(h.led)} on`,
+        '} else {',
+        `  digitalWrite(${ln}, ${OFF(low)});  //! released -> ${ledLabel(h.led)} off`,
+        '}',
+      ];
+    }
+    return [
+      `if (digitalRead(${bn}) == LOW) {  //! ${btnLabel(h.btn)} pressed?`,
+      `  digitalWrite(${ln}, ${ON(low)});`,
+      '} else {',
+      `  digitalWrite(${ln}, ${OFF(low)});`,
+      '}',
+    ];
+  };
+
+  // ---------- blinks ----------
+  const multiBlink = c.blinks.length > 1;
+  const blinkVars = i => ({ pm: multiBlink ? `previousMillis${i + 1}` : 'previousMillis', iv: multiBlink ? `interval${i + 1}` : 'interval' });
+  const ledStatesDeclared = new Set();
+  const declareLedState = (pin, isVolatile) => {
+    const n = ledState(pin);
+    if (ledStatesDeclared.has(n)) return;
+    ledStatesDeclared.add(n);
+    gState.push(`${isVolatile ? 'volatile ' : ''}int ${n} = ${OFF(ledLow(pin))};  //! current level written to ${ledLabel(pin)}`);
+  };
+  c.toggles.forEach((t, i) => at('toggle-' + i, () => declareLedState(t.led, true)));
+  c.blinks.forEach((b, i) => at('blink-' + i, () => {
+    declareLedState(b.led, false);
+    const { pm, iv } = blinkVars(i);
+    gState.push(`unsigned long ${pm} = 0;  //! last time ${ledLabel(b.led)} changed`);
+    if (b.potOn) gState.push(`long ${iv} = ${b.minMs ?? 200};  //! on/off time, set from the pot in every pass`);
+    else gState.push(`const long ${iv} = ${b.ms};  //! ${b.ms} ms = ${b.ms / 1000} s on, ${b.ms / 1000} s off`);
+  }));
+  const blinkBody = (b, i) => {
+    const { pm, iv } = blinkVars(i);
+    const st = ledState(b.led);
+    return [
+      ...(b.potOn ? [`${iv} = map(analogRead(${potName(b.pot)}), 0, 4095, ${b.minMs ?? 200}, ${b.maxMs ?? 2000});  //! knob sets the speed: ${b.minMs ?? 200}..${b.maxMs ?? 2000} ms`] : []),
+      `if (currentMillis - ${pm} >= ${iv}) {  //! has the interval passed? (non-blocking, unlike delay())`,
+      `  ${pm} = currentMillis;  //! remember when we last toggled`,
+      `  ${st} = !${st};  //! flip HIGH <-> LOW`,
+      `  digitalWrite(${ledName(b.led)}, ${st});`,
+      '}',
+    ];
+  };
+
+  // ---------- toggles (interrupt) ----------
+  c.toggles.forEach((t, i) => at('toggle-' + i, () => {
+    const fname = c.toggles.length === 1 ? 'toggle' : `toggle${ledLabel(t.led)}`;
+    const st = ledState(t.led), ln = ledName(t.led), bn = btnName(t.btn);
+    const edge = ['FALLING', 'RISING', 'CHANGE', 'LOW', 'HIGH'].includes(t.edge) ? t.edge : 'FALLING';
+    if (t.debounce) {
+      const lp = c.toggles.length === 1 ? 'lastPress' : `lastPress${i + 1}`;
+      gState.push(`volatile unsigned long ${lp} = 0;  //! time of the last accepted press (debounce)`);
+      fns.push([
+        `void IRAM_ATTR ${fname}() {  //! ISR: runs automatically on each ${edge} edge of ${bn}`,
+        `  if (millis() - ${lp} > 200) {  //! ignore switch bounce within 200 ms`,
+        `    ${lp} = millis();`,
+        `    ${st} = !${st};`,
+        `    digitalWrite(${ln}, ${st});`,
+        '  }',
+        '}',
+      ]);
+    } else {
+      fns.push([
+        `void IRAM_ATTR ${fname}() {  //! ISR: runs automatically on each ${edge} edge of ${bn}. Keep it short!`,
+        `  ${st} = !${st};  //! toggle the remembered level`,
+        `  digitalWrite(${ln}, ${st});`,
+        '}',
+      ]);
+      warn('info', 'Interrupt toggle without debounce: a bouncy switch can toggle twice per press. Tick "debounce" if the LED misbehaves.');
+    }
+    setup.push(`attachInterrupt(digitalPinToInterrupt(${bn}), ${fname}, ${edge});  //! ${edge === 'FALLING' ? 'FALLING = HIGH -> LOW = the moment you press' : edge === 'RISING' ? 'RISING = LOW -> HIGH = the moment you release' : edge + ' trigger'}`);
+  }));
+
+  // ---------- tasks or loop for holds/blinks ----------
+  if (tasksMode) {
+    const pinned = c.run === 'pinned';
+    const mkTask = (name, body, core, timed) => {
+      const dly = c.showCore ? 100 : 10;
+      fns.push([
+        `void ${name}(void * parameter) {`,
+        '  for (;;) {  //! a task must never return, so it loops forever',
+        ...(c.showCore ? [`    Serial.print("${name}() running on core ");`, '    Serial.println(xPortGetCoreID());  //! 0 or 1'] : []),
+        ...(timed ? ['    unsigned long currentMillis = millis();'] : []),
+        ...body.map(l => '    ' + l),
+        `    delay(${dly});  //! pause so other tasks (and the watchdog) get CPU time`,
+        '  }',
+        '  vTaskDelete(NULL);  //! never reached; kept from the Lecture 4 pattern',
+        '}',
+      ]);
+      const first = taskCreates.length === 0;
+      taskCreates.push(pinned
+        ? `xTaskCreatePinnedToCore(${name}, "${name}", 2048, NULL, 1, NULL, ${core});${first ? '  //! (function, name, stack bytes, parameter, priority, handle, CORE)' : '  //! core ' + core}`
+        : `xTaskCreate(${name}, "${name}", 2048, NULL, 1, NULL);${first ? '  //! (function, name, stack bytes, parameter, priority, handle)' : ''}`);
+    };
+    c.blinks.forEach((b, i) => at('blink-' + i + ' global', () => mkTask(c.blinks.length === 1 ? 'TimerLED' : `TimerLED${i + 1}`, blinkBody(b, i), 0, true)));
+    c.holds.forEach((h, i) => at('hold-' + i + ' global', () => mkTask(c.holds.length === 1 ? 'SwitchLED' : `SwitchLED${i + 1}`, holdBody(h), 1, false)));
+    if (!c.blinks.length && !c.holds.length) warn('info', 'FreeRTOS mode is on, but there are no blink or button-hold blocks to turn into tasks.');
+  } else {
+    c.holds.forEach((h, i) => at('hold-' + i, () => loopBody.push(...holdBody(h))));
+    c.blinks.forEach((b, i) => at('blink-' + i, () => { needMillis = true; loopBody.push(...blinkBody(b, i)); }));
+  }
+
+  // ---------- PWM pot -> LED ----------
+  if (c.pwm.on) at('pwm', () => {
+    addPwmGlobals();
+    if (c.pwmApi === 'v2') gState.push('const int ledChannel = 0;  //! PWM channel 0..15');
+    setup.push(...pwmAttach(ledName(c.pwm.led), 'ledChannel'));
+    gState.push('int potValue = 0;  //! 0..4095 (12-bit ADC)', 'int ledValue = 0;  //! 0..255 (8-bit PWM)');
+    loopBody.push(
+      `potValue = analogRead(${potName(c.pwm.pot)});  //! 0 V -> 0, 3.3 V -> 4095`,
+      'ledValue = map(potValue, 0, 4095, 0, 255);  //! rescale 12-bit input to 8-bit duty',
+      pwmWrite(ledName(c.pwm.led), 'ledChannel', 'ledValue'),
+    );
+  });
+
+  // ---------- pot threshold -> LED ----------
+  if (c.potLed.on) at('potLed', () => {
+    const ln = ledName(c.potLed.led), low = ledLow(c.potLed.led);
+    loopBody.push(
+      `if (analogRead(${potName(c.potLed.pot)}) > ${c.potLed.thr}) {  //! knob past the threshold?`,
+      `  digitalWrite(${ln}, ${ON(low)});`,
+      '} else {',
+      `  digitalWrite(${ln}, ${OFF(low)});`,
+      '}',
+    );
+  });
+
+  // ---------- touch action ----------
+  if (c.touch.on) at('touch', () => {
+    const tn = touchName(c.touch.pin);
+    if (c.touch.action === 'restart') {
+      loopBody.push(
+        `int touchValue = touchRead(${tn});  //! untouched: high (~70+), touched: low`,
+        `if (touchValue < ${c.touch.thr}) {  //! tune this threshold by printing touchValue first`,
+        '  Serial.println("Touched! Restarting...");',
+        '  ESP.restart();  //! software reset: setup() runs again from the top',
+        '}',
+      );
+    } else {
+      const ln = ledName(c.touch.led);
+      loopBody.push(
+        `if (touchRead(${tn}) < ${c.touch.thr}) {  //! touched -> value drops`,
+        `  digitalWrite(${ln}, HIGH);`,
+        '} else {',
+        `  digitalWrite(${ln}, LOW);`,
+        '}',
+      );
+    }
+  });
+
+  // ---------- periodic sensor printing ----------
+  if (c.sensors.on) at('sensors', () => {
+    const sens = [];
+    if (c.sensors.pot) sens.push(['Pot', `analogRead(${potName(c.sensors.potPin)})`]);
+    if (c.sensors.touch) sens.push(['Touch', `touchRead(${touchName(c.sensors.touchPin)})`]);
+    if (c.sensors.hall) sens.push(['Hall', 'hallRead()']);
+    const pb = c.blinks.findIndex(b => b.potOn);
+    if (c.sensors.interval && pb >= 0) sens.push(['interval', blinkVars(pb).iv]);
+    if (c.sensors.interval && pb < 0) warn('info', 'Print "blink interval" needs a blink whose speed comes from the pot.');
+    if (c.sensors.hall) warn('warn', 'hallRead() was removed in ESP32 Arduino core 3.x. It only compiles on core 2.x (Boards Manager: esp32 2.0.17).');
+    if (!sens.length) { warn('info', 'Print sensors is on but no sensor is ticked.'); return; }
+    needMillis = true;
+    gState.push('unsigned long lastPrint = 0;  //! last time we printed', `const long printInterval = ${c.sensors.ms};  //! print every ${c.sensors.ms} ms`);
+    loopBody.push('if (currentMillis - lastPrint >= printInterval) {', '  lastPrint = currentMillis;');
+    if (sens.length === 1 && sens[0][0] !== 'interval') loopBody.push(`  Serial.println(${sens[0][1]});`);
+    else sens.forEach(([n, e], i) => loopBody.push(`  Serial.print("${i ? '  ' : ''}${n.toLowerCase()}=");`, `  Serial.print(${e});`, ...(n === 'interval' ? ['  Serial.print(" ms");'] : []), ...(i === sens.length - 1 ? ['  Serial.println();'] : [])));
+    loopBody.push('}');
+  });
+
+  // ---------- WiFi ----------
+  if (needNet) at('wifi', () => {
+    addInc('#include <WiFi.h>');
+    gNet.push(`const char* ssid = "${q(c.wifi.ssid)}";  //! ${ap ? 'name of the network the ESP32 creates' : 'your hotspot name (2.4 GHz only!)'}`);
+    gNet.push(`const char* password = "${q(c.wifi.pass)}";`);
+    if (/^Your (SSID|Password)$/.test(c.wifi.ssid) || /^Your (SSID|Password)$/.test(c.wifi.pass)) warn('warn', 'WiFi name/password are still placeholders. Fill in your hotspot details in the WiFi block.');
+    if (ap) {
+      setup.push(
+        'Serial.print("Setting soft-AP ... ");',
+        'boolean result = WiFi.softAP(ssid, password);  //! ESP32 creates its own network (password needs 8+ characters)',
+        'if (result == true) {',
+        '  Serial.println("Ready");',
+        '} else {',
+        '  Serial.println("Failed!");',
+        '}',
+        'Serial.print("AP IP address: ");',
+        'Serial.println(WiFi.softAPIP());  //! usually 192.168.4.1',
+      );
+      if (String(c.wifi.pass).length < 8) warn('err', 'Soft-AP password must be at least 8 characters, or WiFi.softAP() fails.');
+      if (needInternet) warn('err', 'NTP, ThingSpeak and MQTT need the internet. Use Station mode (join your hotspot), not Soft-AP.');
+    } else {
+      setup.push(
+        'Serial.print("Connecting to ");',
+        'Serial.println(ssid);',
+        'WiFi.mode(WIFI_STA);  //! station = join an existing WiFi network',
+        'WiFi.begin(ssid, password);',
+        'while (WiFi.status() != WL_CONNECTED) {  //! wait until connected',
+        '  delay(500);',
+        '  Serial.print(".");',
+        '}',
+        'Serial.println("");',
+        'Serial.print("Connected, IP address: ");',
+        `Serial.println(WiFi.localIP());${c.web.on ? '  //! type this IP into the browser' : ''}`,
+      );
+    }
+    pots.forEach(p => { if (PINS.ADC2.includes(p.pin)) warn('err', `GPIO${p.pin}${GPIO_ANALOG[p.pin] ? ' (' + GPIO_ANALOG[p.pin] + ')' : ''} is an ADC2 pin. ADC2 cannot read while WiFi is on. Use an ADC1 pin: A0/36, A3/39, A4/32, A5/33, A6/34, A7/35.`); });
+  });
+
+  // ---------- NTP ----------
+  if (c.ntp.on) at('ntp', () => {
+    addInc('#include "time.h"');
+    gNet.push('const char* ntpServer = "pool.ntp.org";', `const long gmtOffset_sec = ${c.ntp.gmt} * 3600;  //! Thailand = GMT+7 -> 25200 s`, 'const int daylightOffset_sec = 0;  //! no daylight saving in Thailand');
+    fns.push([
+      'void printLocalTime() {',
+      '  struct tm timeinfo;',
+      '  if (!getLocalTime(&timeinfo)) {  //! fills timeinfo from the internal clock',
+      '    Serial.println("Failed to obtain time");',
+      '    return;',
+      '  }',
+      '  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");  //! e.g. Thursday, October 08 2026 09:20:00',
+      '}',
+    ]);
+    setup.push('configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);  //! ask the NTP server for the time', 'printLocalTime();');
+    if (c.ntp.disconnect && !(c.web.on || c.ts.on || mq.on)) setup.push('WiFi.disconnect(true);  //! time is now kept by the internal clock, so WiFi can go', 'WiFi.mode(WIFI_OFF);');
+    needMillis = true;
+    gState.push('unsigned long lastTimePrint = 0;');
+    loopBody.push(`if (currentMillis - lastTimePrint >= ${c.ntp.ms}) {  //! print the time every ${c.ntp.ms / 1000} s`, '  lastTimePrint = currentMillis;', '  printLocalTime();', '}');
+  });
+
+  // ---------- ThingSpeak ----------
+  if (c.ts.on) at('ts', () => {
+    addInc('#include <HTTPClient.h>');
+    gNet.push(`String serverName = "http://api.thingspeak.com/update?api_key=${q(c.ts.key)}";  //! your channel's WRITE API key`);
+    gState.push('unsigned long lastTime = 0;', `unsigned long timerDelay = ${c.ts.ms};  //! send every ${c.ts.ms / 1000} s`);
+    if (+c.ts.ms < 15000) warn('warn', 'ThingSpeak free accounts accept one update per 15 s. Faster updates are rejected (response body "0"). Use 15000 ms or more.');
+    if (/YOUR_|^$/.test(c.ts.key)) warn('warn', 'ThingSpeak API key is a placeholder. Copy the Write API Key from your channel.');
+    if ([c.ts.f1, c.ts.f2, c.ts.f3].includes('hall')) warn('warn', 'hallRead() was removed in ESP32 Arduino core 3.x.');
+    const fieldExpr = src => ({ pot: `String(analogRead(${potName(c.ts.potPin)}))`, random: 'String(random(100))', touch: `String(touchRead(${touchName(touches[0] ? touches[0].pin : 32)}))`, hall: 'String(hallRead())' }[src]);
+    const fields = [c.ts.f1, c.ts.f2, c.ts.f3].map((f, i) => (f && f !== 'none' ? `"&field${i + 1}=" + ${fieldExpr(f)}` : null)).filter(Boolean);
+    const cl = c.web.on ? 'tsClient' : 'client';
+    needMillis = true;
+    loopBody.push(
+      'if ((currentMillis - lastTime) > timerDelay) {',
+      '  if (WiFi.status() == WL_CONNECTED) {',
+      `    WiFiClient ${cl};`,
+      '    HTTPClient http;',
+      `    String HttpRequest = serverName + ${fields.join(' + ') || '""'};  //! e.g. ...&field1=2048&field2=37`,
+      '    Serial.print("HTTP Request: ");',
+      '    Serial.println(HttpRequest);',
+      `    http.begin(${cl}, HttpRequest);`,
+      '    int httpResponseCode = http.GET();  //! 200 = OK; negative = could not connect',
+      '    if (httpResponseCode > 0) {',
+      '      Serial.print("HTTP Response code: ");',
+      '      Serial.println(httpResponseCode);',
+      '    } else {',
+      '      Serial.print("Error code: ");',
+      '      Serial.println(httpResponseCode);',
+      '    }',
+      '    http.end();  //! free resources',
+      '  } else {',
+      '    Serial.println("WiFi Disconnected");',
+      '  }',
+      '  lastTime = currentMillis;',
+      '}',
+    );
+  });
+
+  // ---------- MQTT ----------
+  if (mq.on) at('mqtt', () => {
+    addInc('#include <PubSubClient.h>');
+    if (!mqttPub && !mqttSub) warn('warn', 'MQTT is on but neither Publish nor Subscribe is ticked.');
+    const sameTopic = !routes.length && (!(mqttPub && mqttSub) || mq.pubTopic === mq.subTopic);
+    const pubT = sameTopic ? 'Topic' : 'PubTopic', subT = sameTopic ? 'Topic' : 'SubTopic';
+    gNet.push(`const char* mqtt_server = "${q(mq.server)}";  //! public broker, no username/password`, `const int mqtt_port = ${mq.port};  //! 1883 = plain (unencrypted) MQTT`);
+    gNet.push(`const char* ClientID = "${q(S(mq.clientId))}";  //! must be UNIQUE on the broker (two boards = two IDs)`);
+    if (sameTopic) at('mqtt mqtt-pub mqtt-sub', () => gNet.push(`const char* Topic = "${q(S(mqttPub ? mq.pubTopic : mq.subTopic))}";  //! publisher and subscriber must use the exact same topic`));
+    else {
+      if (mqttPub) at('mqtt-pub', () => gNet.push(`const char* PubTopic = "${q(S(mq.pubTopic))}";  //! I publish MY value here`));
+      if (mqttSub) at('mqtt-sub', () => gNet.push(`const char* SubTopic = "${q(S(mq.subTopic))}";  //! ${routes.length ? 'one subscription (wildcards allowed) covers every route below' : 'I listen to the OTHER node here'}`));
+    }
+    const routeName = [];
+    routes.forEach((r, i) => {
+      if (mqttPub && r.topic === mq.pubTopic) { routeName.push('PubTopic'); return; }
+      const n = `Route${i + 1}Topic`; routeName.push(n);
+      at('mqtt-route-' + i, () => gNet.push(`const char* ${n} = "${q(S(r.topic))}";`));
+      if (/[+#]/.test(r.topic)) warn('err', `MQTT route ${i + 1}: use an exact topic (no + or #). Wildcards belong in the subscription.`);
+      else if (!mqttMatch(mq.subTopic, r.topic)) warn('warn', `MQTT route ${i + 1} topic "${r.topic}" is not covered by the subscription "${mq.subTopic}", so it will never arrive. Try a # wildcard such as "${r.topic.split('/').slice(0, -1).join('/')}/#".`);
+    });
+    if (routes.length && !/[+#]/.test(mq.subTopic) && routes.length > 1) warn('warn', 'Several routes but the subscription has no wildcard, so only one topic can arrive. End the subscription with /# .');
+    if (mq.status) at('mqtt', () => gNet.push(`const char* StatusTopic = "${q(S(mq.statusTopic))}";  //! announce "${q(mq.statusMsg)}" here after connecting`));
+    gState.push('unsigned long lastMsg = 0;  //! last publish time', '', 'WiFiClient ClientNode;  //! TCP connection used by MQTT', 'PubSubClient ClientESP(ClientNode);  //! the MQTT client');
+    if (/YourStudentID/.test(mq.clientId + mq.pubTopic + mq.subTopic + routes.map(r => r.topic).join('')) && !sid) warn('warn', 'MQTT client ID / topic still say "YourStudentID". Enter your student ID at the top so they are unique on the public broker.');
+
+    setup.push('ClientESP.setServer(mqtt_server, mqtt_port);  //! which broker to use');
+    if (mqttSub) at('mqtt-sub', () => setup.push('ClientESP.setCallback(callback);  //! function to run when a message arrives'));
+    setup.push('ConnectMQTT();');
+
+    const subLine = [];
+    if (mqttSub) at('mqtt-sub', () => subLine.push(`      ClientESP.subscribe(${subT});  //! (re)subscribe after every connect` + '\u0001mqtt-sub\u0001'));
+    if (mq.status) subLine.push(`      ClientESP.publish(StatusTopic, "${q(mq.statusMsg)}");  //! tell everyone this board is online` + '\u0001mqtt\u0001');
+    fns.push([
+      'void ConnectMQTT() {',
+      '  while (!ClientESP.connected()) {',
+      '    Serial.print("Attempting MQTT connection...");',
+      '    if (ClientESP.connect(ClientID, NULL, NULL)) {  //! NULL, NULL = no username/password',
+      '      Serial.println("connected");',
+      ...subLine,
+      '    } else {',
+      '      Serial.print("failed, rc=");',
+      '      Serial.print(ClientESP.state());  //! -2 = network/broker unreachable, 2 = bad client ID',
+      '      Serial.println(" try again in 5 seconds");',
+      '      delay(5000);',
+      '    }',
+      '  }',
+      '}',
+    ]);
+
+    const ledAction = (ln, low, action, thr, chan, ind) => {
+      if (action === 'onoff') return [
+        `${ind}if (ValString.equalsIgnoreCase("on")) {  //! payload "on" / "off" (any case)`,
+        `${ind}  digitalWrite(${ln}, ${ON(low)});`,
+        `${ind}} else if (ValString.equalsIgnoreCase("off")) {`,
+        `${ind}  digitalWrite(${ln}, ${OFF(low)});`,
+        `${ind}}`,
+      ];
+      if (action === 'pwm') return [`${ind}` + pwmWrite(ln, chan, 'map(ValString.toInt(), 0, 4095, 0, 255)').replace('//!', '//! brightness follows the value;')];
+      return [
+        `${ind}if (ValString.toInt() > ${thr}) {  //! "2048" -> 2048, then compare`,
+        `${ind}  digitalWrite(${ln}, ${ON(low)});`,
+        `${ind}} else {`,
+        `${ind}  digitalWrite(${ln}, ${OFF(low)});`,
+        `${ind}}`,
+      ];
+    };
+    if (mqttSub && routes.length) at('mqtt-sub', () => {
+      const body = ['  String t = String(topic);  //! which topic did this message come from?'];
+      routes.forEach((r, i) => at('mqtt-route-' + i, () => {
+        const ln = ledName(r.led), low = ledLow(r.led), chan = `routeChannel${i + 1}`;
+        if (r.action === 'pwm') {
+          addPwmGlobals();
+          if (c.pwmApi === 'v2') gState.push(`const int ${chan} = ${i + 1};  //! PWM channel for route ${i + 1}`);
+          setup.push(...pwmAttach(ln, chan));
+        }
+        body.push(...[`  ${i ? '} else ' : ''}if (t == ${routeName[i]}) {${i ? '' : '  //! route each topic to its own action'}`, ...ledAction(ln, low, r.action, r.thr, chan, '    ')].map(tagLine));
+      }));
+      body.push('  }', '  //! any other topic under the subscription is ignored');
+      fns.push([
+        'void callback(char* topic, byte* payload, unsigned int length) {  //! called by ClientESP.loop() for each message',
+        '  Serial.print("Message arrived [");',
+        '  Serial.print(topic);',
+        '  Serial.print("] ");',
+        '  String ValString;',
+        '  for (int i = 0; i < length; i++) {  //! payload is raw bytes, NOT a C string: build a String',
+        '    Serial.print((char)payload[i]);',
+        '    ValString += (char)payload[i];',
+        '  }',
+        '  Serial.println();',
+        ...body,
+        '}',
+      ]);
+    });
+    if (mqttSub && !routes.length) at('mqtt-sub', () => {
+      const ln = ledName(mq.subLed), low = ledLow(mq.subLed);
+      let action;
+      if (mq.subAction === 'onoff') {
+        action = [
+          '  if (ValString.equalsIgnoreCase("on")) {  //! payload "on" / "off" (any case)',
+          `    digitalWrite(${ln}, ${ON(low)});`,
+          '  } else if (ValString.equalsIgnoreCase("off")) {',
+          `    digitalWrite(${ln}, ${OFF(low)});`,
+          '  }',
+        ];
+      } else if (mq.subAction === 'pwm') {
+        addPwmGlobals();
+        if (c.pwmApi === 'v2') gState.push('const int mqttChannel = 1;  //! PWM channel for the MQTT LED');
+        setup.push(...pwmAttach(ln, 'mqttChannel'));
+        action = [
+          '  int ValInt = ValString.toInt();  //! "2048" -> 2048',
+          '  Serial.print("Sub : ");',
+          '  Serial.println(ValInt);',
+          '  ' + pwmWrite(ln, 'mqttChannel', 'map(ValInt, 0, 4095, 0, 255)').replace('//!', '//! brightness follows the value;'),
+        ];
+      } else {
+        action = [
+          '  int ValInt = ValString.toInt();  //! "2048" -> 2048 (text payload -> number)',
+          '  Serial.print("Sub : ");',
+          '  Serial.println(ValInt);',
+          `  if (ValInt > ${mq.subThr}) {`,
+          `    digitalWrite(${ln}, ${ON(low)});  //! LED on`,
+          '  } else {',
+          `    digitalWrite(${ln}, ${OFF(low)});  //! LED off`,
+          '  }',
+        ];
+      }
+      fns.push([
+        'void callback(char* topic, byte* payload, unsigned int length) {  //! called by ClientESP.loop() for each message',
+        '  Serial.print("Message arrived [");',
+        '  Serial.print(topic);',
+        '  Serial.print("] ");',
+        '  String ValString;',
+        '  for (int i = 0; i < length; i++) {  //! payload is raw bytes, NOT a C string: build a String',
+        '    Serial.print((char)payload[i]);',
+        '    ValString += (char)payload[i];',
+        '  }',
+        '  Serial.println();',
+        ...action,
+        '}',
+      ]);
+    });
+
+    const mqttLoop = [
+      'if (!ClientESP.connected()) {  //! reconnect if the broker dropped us',
+      '  ConnectMQTT();',
+      '}',
+      'ClientESP.loop();  //! keeps the connection alive and delivers incoming messages',
+    ];
+    const pubLoop = [];
+    if (mqttPub) {
+      needMillis = true;
+      let expr;
+      if (mq.pubSrc === 'touch') expr = `touchRead(${touchName(mq.pubPin)})`;
+      else if (mq.pubSrc === 'button') expr = `(digitalRead(${btnName(mq.pubPin)}) == LOW) ? 1 : 0`;
+      else if (mq.pubSrc === 'random') expr = 'random(0, 100)';
+      else expr = `analogRead(${potName(mq.pubPin)})`;
+      pubLoop.push(
+        `if (currentMillis - lastMsg > ${mq.pubMs}) {  //! publish every ${mq.pubMs / 1000} s`,
+        '  lastMsg = currentMillis;',
+        '  char Val[8];',
+        `  dtostrf(${expr}, 1, 0, Val);  //! number -> text (MQTT payloads are text)`,
+        `  ClientESP.publish(${pubT}, Val);`,
+        '  Serial.print("Pub: ");',
+        '  Serial.println(Val);',
+        '}',
+      );
+    }
+    at('mqtt-pub', () => loopBody.unshift(...pubLoop));
+    loopBody.unshift(...mqttLoop);
+    if (mqttSub && !routes.length && /[+#]/.test(mq.subTopic)) warn('info', 'Wildcard subscription with a single action: every matching topic drives the LED. Add routes to act per topic.');
+    if (mqttPub && mqttSub && sameTopic) warn('info', 'Publishing and subscribing to the same topic: this board reacts to its own messages (Homework 4 P1). For two boards controlling each other, use different Pub/Sub topics.');
+  });
+
+  // ---------- Web server ----------
+  let webOrder = [], rowOrder = [];
+  if (c.web.on) at('web', () => {
+    const outs = c.web.outputs || [];
+    gNet.push('WiFiServer server(80);  //! HTTP uses port 80');
+    gState.push('String header;  //! stores the HTTP request text');
+    outs.forEach((o, i) => at('web-out-' + i, () => {
+      gPins.push(`const int output${o.pin} = ${pinExpr(o.pin)};${o.low ? '  //! active LOW: LOW = on' : ''}`);
+      gState.push(`String output${o.pin}State = "off";`);
+      use(o.pin, 'OUTPUT', 'web button');
+      setup.push(`pinMode(output${o.pin}, OUTPUT);`, `digitalWrite(output${o.pin}, ${OFF(o.low)});  //! start off`);
+    }));
+    gState.push('unsigned long currentTime = millis();', 'unsigned long previousTime = 0;', 'const long timeoutTime = 2000;  //! drop a client after 2 s');
+    setup.push('server.begin();  //! start listening for browsers');
+
+    // table rows and page order
+    const rowsOn = [c.web.pot && 'pot', c.web.volt && 'volt', c.web.touch && 'touch', c.web.btn && 'button', c.web.uptime && 'uptime'].filter(Boolean);
+    rowOrder = (c.web.rowOrder || []).filter(r => rowsOn.includes(r));
+    rowsOn.forEach(r => { if (!rowOrder.includes(r)) rowOrder.push(r); });
+    const allOff = c.web.allOff && outs.length > 0;
+    if (c.web.allOff && !outs.length) warn('info', 'ALL OFF needs at least one output button.');
+    const keys = [...(rowsOn.length ? ['table'] : []), ...outs.map(o => 'out-' + o.pin), ...(allOff ? ['alloff'] : [])];
+    webOrder = (c.web.order || []).filter(k => keys.includes(k));
+    keys.forEach(k => { if (!webOrder.includes(k)) webOrder.push(k); });
+    if (!keys.length) warn('info', 'Web server shows nothing yet. Add output buttons or tick a sensor to display.');
+
+    const I = '            ';
+    const page = arr();
+    const P = s => page.push(I + s);
+    outs.forEach((o, i) => at('web-out-' + i, () => {
+      P(`${i === 0 ? '' : '} else '}if (header.indexOf("GET /${o.pin}/on") >= 0) {${i === 0 ? '  //! which button was clicked? look for it in the request' : ''}`);
+      P(`  Serial.println("GPIO ${o.pin} on");`);
+      P(`  output${o.pin}State = "on";`);
+      P(`  digitalWrite(output${o.pin}, ${ON(o.low)});`);
+      P(`} else if (header.indexOf("GET /${o.pin}/off") >= 0) {`);
+      P(`  Serial.println("GPIO ${o.pin} off");`);
+      P(`  output${o.pin}State = "off";`);
+      P(`  digitalWrite(output${o.pin}, ${OFF(o.low)});`);
+    }));
+    if (allOff) at('web-alloff', () => {
+      P('} else if (header.indexOf("GET /all/off") >= 0) {  //! the ALL OFF button');
+      P('  Serial.println("All outputs off");');
+      outs.forEach(o => { P(`  output${o.pin}State = "off";`); P(`  digitalWrite(output${o.pin}, ${OFF(o.low)});`); });
+    });
+    if (outs.length) P('}');
+    P(String.raw`client.println("<!DOCTYPE html><html>");`);
+    P(String.raw`client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");`);
+    if (+c.web.refresh > 0) P(String.raw`client.println("<meta http-equiv=\"refresh\" content=\"${+c.web.refresh}; url=/\">");  //! reload "/" every ${+c.web.refresh} s (never repeats the last button)`);
+    P(String.raw`client.println("<link rel=\"icon\" href=\"data:,\">");`);
+    P(String.raw`client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");`);
+    if (outs.length) {
+      P(String.raw`client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");`);
+      P(String.raw`client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");`);
+      P(String.raw`client.println(".button2 {background-color: #555555;}${allOff ? ' .button3 {background-color: #C0392B;}' : ''}");`);
+    }
+    if (rowsOn.length) P(String.raw`client.println("table { border-collapse: collapse; margin: 0 auto; } th, td { border: 1px solid black; padding: 10px 30px; font-size: 22px; }");`);
+    P(String.raw`client.println("</style></head>");`);
+    P(String.raw`client.println("<body><h1>${q(c.web.title).replace(/</g, '')}</h1>");`);
+    const rowLine = {
+      pot: () => String.raw`client.println("<tr><td>Potentiometer</td><td>" + String(analogRead(${potName(c.web.potPin)})) + "</td></tr>");  //! read fresh on every page load`,
+      touch: () => String.raw`client.println("<tr><td>Touch (GPIO${c.web.touchPin})</td><td>" + String(touchRead(${touchName(c.web.touchPin)})) + "</td></tr>");`,
+      volt: () => String.raw`client.println("<tr><td>Voltage (V)</td><td>" + String(analogRead(${potName(c.web.potPin)}) * 3.3 / 4095.0, 2) + "</td></tr>");  //! 0..4095 -> 0..3.3 V, 2 decimals`,
+      button: () => String.raw`client.println("<tr><td>Switch</td><td>" + String(digitalRead(${btnName(c.web.btnPin)}) == LOW ? "Pressed" : "Released") + "</td></tr>");`,
+      uptime: () => String.raw`client.println("<tr><td>Uptime (s)</td><td>" + String(millis() / 1000) + "</td></tr>");`,
+    };
+    webOrder.forEach(k => {
+      if (k === 'alloff') at('web-alloff', () => P(String.raw`client.println("<p><a href=\"/all/off\"><button class=\"button button3\">ALL OFF</button></a></p>");`));
+      else if (k === 'table') at('web-table', () => {
+        P(String.raw`client.println("<table>");`);
+        P(String.raw`client.println("<tr><th>Sensor</th><th>Value</th></tr>");`);
+        rowOrder.forEach(r => P(rowLine[r]()));
+        P(String.raw`client.println("</table>");`);
+      });
+      else {
+        const i = outs.findIndex(o => 'out-' + o.pin === k), o = outs[i];
+        at('web-out-' + i, () => {
+          P(String.raw`client.println("<p>GPIO ${o.pin} - State " + output${o.pin}State + "</p>");`);
+          P(`if (output${o.pin}State == "off") {  //! show ON button when off, OFF button when on`);
+          P(String.raw`  client.println("<p><a href=\"/${o.pin}/on\"><button class=\"button\">ON</button></a></p>");`);
+          P('} else {');
+          P(String.raw`  client.println("<p><a href=\"/${o.pin}/off\"><button class=\"button button2\">OFF</button></a></p>");`);
+          P('}');
+        });
+      }
+    });
+    P(String.raw`client.println("</body></html>");`);
+    loopBody.push(
+      'WiFiClient client = server.available();  //! did a browser connect?',
+      'if (client) {',
+      '  currentTime = millis();',
+      '  previousTime = currentTime;',
+      '  Serial.println("New Client.");',
+      '  String currentLine = "";  //! the line of the request we are reading now',
+      '  while (client.connected() && currentTime - previousTime <= timeoutTime) {',
+      '    currentTime = millis();',
+      '    if (client.available()) {',
+      '      char c = client.read();  //! read the request one character at a time',
+      '      Serial.write(c);',
+      '      header += c;',
+      "      if (c == '\\n') {",
+      '        if (currentLine.length() == 0) {  //! empty line = end of the request, so reply now',
+      '          client.println("HTTP/1.1 200 OK");  //! status line',
+      '          client.println("Content-type:text/html");',
+      '          client.println("Connection: close");',
+      '          client.println();  //! blank line separates headers from the page',
+      ...page.map(l => l.slice(2)),
+      '          client.println();  //! response ends with another blank line',
+      '          break;',
+      '        } else {',
+      '          currentLine = "";',
+      '        }',
+      "      } else if (c != '\\r') {",
+      '        currentLine += c;',
+      '      }',
+      '    }',
+      '  }',
+      '  header = "";  //! clear for the next request',
+      '  client.stop();',
+      '  Serial.println("Client disconnected.");',
+      '  Serial.println("");',
+      '}',
+    );
+  });
+
+  // ---------- soft-AP status print ----------
+  if (needNet && ap && !c.web.on) at('wifi', () => {
+    needMillis = true;
+    gState.push('unsigned long lastApPrint = 0;');
+    loopBody.push('if (currentMillis - lastApPrint >= 3000) {', '  lastApPrint = currentMillis;', '  Serial.printf("Stations connected = %d\\n", WiFi.softAPgetStationNum());  //! how many phones joined', '}');
+  });
+
+  // ---------- deep sleep trigger ----------
+  const otherWork = loopBody.length > 0 || taskCreates.length > 0;
+  if (sl.on) at('sleep', () => {
+    const offLines = !sl.ledsOff ? [] : [
+      ...leds.filter(l => !l.roles.some(r => r === 'pwm' || r === 'mqttPwm')).map(l => `  digitalWrite(${ledName(l.pin)}, ${OFF(l.low)});  //! LEDs off before sleeping`),
+      ...(c.web.on ? c.web.outputs : []).map(o => `  digitalWrite(output${o.pin}, ${OFF(o.low)});`),
+    ];
+    const goSleep = [
+      'void goToSleep() {',
+      ...offLines,
+      '  Serial.println("... Now, in the deep sleep mode.");',
+      '  delay(100);  //! let Serial finish printing',
+      '  esp_deep_sleep_start();  //! CPU stops; waking up runs setup() again from the top',
+      '}',
+    ];
+    if (sl.trigger === 'button') {
+      gState.push('volatile bool sleepRequested = false;  //! set by the ISR, checked in loop()');
+      fns.push(['void IRAM_ATTR requestSleep() {  //! ISR: only set a flag; do the real work in loop()', '  sleepRequested = true;', '}']);
+      fns.push(goSleep);
+      setup.push(`attachInterrupt(digitalPinToInterrupt(${btnName(sl.btn)}), requestSleep, FALLING);  //! press ${btnLabel(sl.btn)} -> sleep`);
+      loopBody.push(`if (sleepRequested) {  //! ${btnLabel(sl.btn)} was pressed`, `  Serial.println("${btnLabel(sl.btn)} pressed -> entering deep sleep");`, '  goToSleep();', '}');
+      if ((sl.wExt0 ?? sl.wake === 'ext0') && +sl.ext0Pin === +sl.btn) warn('warn', 'The sleep button is also the ext0 wake pin. While you still hold it, the ESP32 wakes straight back up. Release quickly or use another pin.');
+    } else if (!otherWork) {
+      sleepStandalone = true;
+      setup.push(
+        `Serial.println("ESP32 will enter the deep sleep in ${sl.delayS} s.");`,
+        `delay(${sl.delayS * 1000});`,
+        'Serial.println("... Now, in the deep sleep mode.");',
+        'esp_deep_sleep_start();  //! CPU stops here; waking up runs setup() again from the top',
+        'Serial.println("This sentence will never be printed.");',
+      );
+    } else {
+      needMillis = true;
+      fns.push(goSleep);
+      gState.push(`const unsigned long awakeTime = ${sl.delayS * 1000};  //! stay awake this long after boot`);
+      loopBody.push('if (currentMillis >= awakeTime) {  //! awake long enough?', '  goToSleep();', '}');
+    }
+  });
+
+  // ---------- assemble ----------
+  const out = [];
+  if (inc.length) out.push(...inc, '');
+  if (gPins.length) out.push(...gPins, '');
+  if (gNet.length) out.push(...gNet, '');
+  if (gState.length) out.push(...gState, '');
+  fns.forEach(f => out.push(...f, ''));
+  out.push('void setup() {', ...setup.map(l => '  ' + l));
+  if (taskCreates.length) out.push(...taskCreates.map(l => '  ' + l));
+  out.push('}', '');
+  out.push('void loop() {');
+  if (sleepStandalone) out.push('  //! ESP32 never gets here: it sleeps at the end of setup()');
+  else if (!loopBody.length) out.push(taskCreates.length ? '  //! empty: the FreeRTOS tasks do all the work' : '');
+  else {
+    if (needMillis) out.push('  unsigned long currentMillis = millis();  //! ms since boot, read once per loop');
+    out.push(...loopBody.map(l => '  ' + l));
+  }
+  out.push('}');
+  const fin = finalizeCode(out.join('\n'), c.explain);
+
+  // ---------- validation ----------
+  const byPin = {};
+  uses.forEach(u => { if (u.pin >= 0) (byPin[u.pin] ||= []).push(u); });
+  let pullupNote = false;
+  Object.keys(byPin).forEach(k => {
+    const p = +k, list = byPin[k];
+    const modes = [...new Set(list.map(u => u.mode))];
+    if (PINS.FLASH.includes(p)) warn('err', `GPIO${p} is wired to the flash chip (6–11). It is on the ESPino32 header but must not be used.`);
+    else if (!PINS.VALID.includes(p)) warn('err', `GPIO${p} does not exist on the ESPino32. Check the pin number.`);
+    if (PINS.INPUT_ONLY.includes(p) && modes.some(m => m === 'OUTPUT' || m === 'PWM')) warn('err', `GPIO${p} is input-only (34–39). Move the LED/output to another pin, e.g. 16, 17, 26, 27.`);
+    if (modes.includes('ANALOG') && !PINS.ADC1.includes(p) && !PINS.ADC2.includes(p)) warn('err', `GPIO${p} has no ADC, so analogRead() won't work. Use A0 (36), A3 (39), A4 (32), A5 (33), A6 (34) or A7 (35).`);
+    if (modes.includes('TOUCH') && !PINS.TOUCH.includes(p)) warn('err', `GPIO${p} is not a touch pin. Use 0, 2, 4, 12–15, 27, 32 or 33.`);
+    if (PINS.STRAP.includes(p) && modes.some(m => m === 'OUTPUT' || m === 'PWM')) warn('warn', `GPIO${p} is a boot strapping pin. It can block uploading or booting; prefer 16, 17, 26, 27.`);
+    if (PINS.UART.includes(p)) warn('err', `GPIO${p} is the USB serial line (TX/RX). Using it breaks uploading and the Serial Monitor.`);
+    const kinds = new Set(modes.map(m => (m === 'OUTPUT' || m === 'PWM' ? 'out' : 'in')));
+    if (kinds.size > 1) warn('err', `GPIO${p} is used as both an input and an output (${list.map(u => u.role).join(', ')}).`);
+    else if (modes.length > 1 && !(modes.every(m => m === 'INPUT' || m === 'WAKE'))) warn('warn', `GPIO${p} is used by several blocks (${list.map(u => u.role).join(', ')}).`);
+    if (modes.includes('INPUT') && PINS.INPUT_ONLY.includes(p)) pullupNote = true;
+  });
+  if (pullupNote) warn('info', 'Buttons on GPIO34–39: these pins have no internal pull-up, so the external 10k resistor to 3V3 is required.');
+  if (c.pwmApi === 'v2' && pwmGlobals) warn('info', 'Using the ESP32 core 2.x PWM syntax (ledcSetup / ledcAttachPin). On core 3.x switch to "core 3.x" or it will not compile.');
+  if (sl.on && (c.web.on || mq.on) && sl.trigger !== 'button') warn('info', 'Deep sleep turns WiFi off. The web server / MQTT stop until the board wakes and reconnects.');
+
+  // ---------- wiring parts ----------
+  const parts = [];
+  btns.forEach(b => parts.push({ type: 'btn', pin: b.pin, label: btnLabel(b.pin), blocks: b.blocks }));
+  wakePins.forEach(w => {
+    if (w.pull === 'touch') { if (!touches.some(t => t.pin === w.pin)) parts.push({ type: 'touch', pin: w.pin, label: 'Touch to wake', blocks: ['sleep'] }); return; }
+    if (btns.some(b => b.pin === w.pin) || parts.some(p => p.pin === w.pin)) return;
+    parts.push({ type: w.pull === 'down' ? 'btnDown' : 'btn', pin: w.pin, label: `Wake SW (GPIO${w.pin})`, blocks: ['sleep'] });
+  });
+  pots.forEach(p => parts.push({ type: 'pot', pin: p.pin, label: 'Potentiometer', blocks: p.blocks }));
+  touches.forEach(p => parts.push({ type: 'touch', pin: p.pin, label: 'Touch wire', blocks: p.blocks }));
+  leds.forEach(l => parts.push({ type: l.low ? 'ledLow' : 'led', pin: l.pin, label: ledLabel(l.pin), blocks: l.blocks }));
+  (c.web.on ? c.web.outputs : []).forEach((o, i) => parts.push({ type: o.low ? 'ledLow' : 'led', pin: +o.pin, label: leds.length ? `Web LED ${i + 1}` : `LED${i + 1}`, blocks: ['web', 'web-out-' + i] }));
+  parts.forEach(p => { p.alias = GPIO_ANALOG[p.pin] && (p.type === 'pot' || typed[p.pin]) ? GPIO_ANALOG[p.pin] : null; });
+
+  const order = { err: 0, warn: 1, info: 2 };
+  W.sort((a, b) => order[a.lvl] - order[b.lvl]);
+  return { code: fin.code, lineTags: fin.lineTags, warnings: W, parts, config: c, webOrder, rowOrder };
+}
+
+</script>
+<script>/* ===================== Presets (one per course sketch) ===================== */
+const WIFI = { ssid: 'Your SSID', pass: 'Your Password' };
+const PRESETS = {
+  blank: { name: 'Blank sketch', cfg: {} },
+  ex1: { name: 'Ex 1 · Button → LED', cfg: { holds: [{ btn: 34, led: 17, print: true }] } },
+  l3pot: { name: 'L3 Ex 2/4 · Read pot + touch', cfg: { sensors: { on: true, pot: true, touch: true, ms: 1000 } } },
+  hw1p1: { name: 'HW1 P1 · Pot → LED brightness (PWM)', cfg: { pwm: { on: true, pot: 36, led: 17 } } },
+  hw1p2: { name: 'HW1 P2 · NTP date & time', cfg: { wifi: WIFI, ntp: { on: true, disconnect: true }, } },
+  hw1p3: { name: 'HW1 P3 · WiFi + touch → restart', cfg: { wifi: { on: true, ...WIFI }, touch: { on: true, pin: 32, thr: 20, action: 'restart' } } },
+  softap: { name: 'L3 Ex 7 · Soft access point', cfg: { wifi: { on: true, mode: 'AP', ssid: 'ESP32_YourStudentID', pass: '12345678' } } },
+  l4ex1: { name: 'L4 Ex 1 · millis() blink + button LED', cfg: { blinks: [{ led: 16, ms: 2000 }], holds: [{ btn: 34, led: 17 }] } },
+  ex2: { name: 'Ex 2 · Blink + interrupt toggle', cfg: { blinks: [{ led: 16, ms: 2000 }], toggles: [{ btn: 34, led: 17, edge: 'FALLING' }] } },
+  l4ex3: { name: 'L4 Ex 3 · Two FreeRTOS tasks', cfg: { run: 'tasks', blinks: [{ led: 16, ms: 2000 }], holds: [{ btn: 34, led: 17 }] } },
+  hw2p1: { name: 'HW2 P1 · Tasks pinned to cores', cfg: { run: 'pinned', showCore: true, blinks: [{ led: 16, ms: 2000 }], holds: [{ btn: 34, led: 17 }] } },
+  l4timer: { name: 'L4 Ex 7 · Timer wake-up', cfg: { sleep: { on: true, trigger: 'delay', delayS: 10, wake: 'timer', timerS: 5, bootCount: true } } },
+  l4touch: { name: 'L4 Ex 8 · Touch wake-up', cfg: { sleep: { on: true, trigger: 'delay', delayS: 10, wake: 'touch', touchPin: 32, touchThr: 40, bootCount: true } } },
+  hw2p2: { name: 'HW2 P2 · ext0 button wake-up', cfg: { sleep: { on: true, trigger: 'delay', delayS: 10, wake: 'ext0', ext0Pin: 32, ext0Level: 'LOW', bootCount: true } } },
+  l4ext1: { name: 'L4 Ex 10 · ext1 wake-up (2 pins)', cfg: { sleep: { on: true, trigger: 'delay', delayS: 10, wake: 'ext1', ext1Pins: '2,32', ext1Mode: 'ANY_HIGH', bootCount: true } } },
+  hw2p3: { name: 'HW2 P3 · SW1 → sleep, timer wake', cfg: { run: 'pinned', showCore: true, blinks: [{ led: 16, ms: 2000 }], holds: [{ btn: 34, led: 17 }], sleep: { on: true, trigger: 'button', btn: 26, wake: 'timer', timerS: 15, bootCount: true, reason: true } } },
+  ex3: { name: 'Ex 3 · Web server: 2 LED buttons', cfg: { wifi: WIFI, web: { on: true, outputs: [{ pin: 26 }, { pin: 27 }] } } },
+  hw3p1: { name: 'HW3 P1 · Web server: show pot value', cfg: { wifi: WIFI, web: { on: true, title: 'ESP32 WebServer', pot: true, potPin: 36, outputs: [] } } },
+  hw3p2: { name: 'HW3 P2 · ThingSpeak web client', cfg: { wifi: WIFI, ts: { on: true, ms: 15000, f1: 'pot', f2: 'random', f3: 'none' } } },
+  hw3p3: { name: 'HW3 P3 · Web server: 3 LED buttons', cfg: { wifi: WIFI, web: { on: true, outputs: [{ pin: 16 }, { pin: 17 }, { pin: 32 }] } } },
+  ex4pub: { name: 'Ex 4 · MQTT publisher (pot)', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_Pub_YourStudentID', pub: true, pubTopic: 'IoT/PotenValue_YourStudentID', pubSrc: 'pot', pubPin: 36, pubMs: 2000 } } },
+  ex4sub: { name: 'Ex 4 · MQTT subscriber (LED)', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_Sub_YourStudentID', sub: true, subTopic: 'IoT/PotenValue_YourStudentID', subAction: 'threshold', subLed: 26, subThr: 500 } } },
+  hw4p1: { name: 'HW4 P1 · One node pub + sub', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_YourStudentID', pub: true, sub: true, pubTopic: 'IoT/PotenValue_YourStudentID', subTopic: 'IoT/PotenValue_YourStudentID', subLed: 26, subThr: 500 } } },
+  hw4p2n1: { name: 'HW4 P2 · Cross control, Node1', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_Node1_YourStudentID', pub: true, sub: true, pubTopic: 'IoT/Node1_YourStudentID', subTopic: 'IoT/Node2_YourStudentID', subLed: 26, subThr: 500 } } },
+  hw4p2n2: { name: 'HW4 P2 · Cross control, Node2', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_Node2_YourStudentID', pub: true, sub: true, pubTopic: 'IoT/Node2_YourStudentID', subTopic: 'IoT/Node1_YourStudentID', subLed: 26, subThr: 500 } } },
+  mock11: { name: 'Mock 1.1 · Snooze lamp', cfg: { blinks: [{ led: 16, ms: 1000, potOn: true, pot: 'A4', minMs: 200, maxMs: 2000 }], toggles: [{ btn: 34, led: 17, edge: 'FALLING', debounce: true }], sensors: { on: true, pot: true, potPin: 'A4', interval: true, ms: 1000 }, sleep: { on: true, trigger: 'button', btn: 26, wTimer: true, timerS: 10, wExt0: true, wExt1: false, wTouch: false, ext0Pin: 34, ext0Level: 'LOW', bootCount: true, reason: true, ledsOff: true } } },
+  mock12: { name: 'Mock 1.2 · Control panel web server', cfg: { wifi: WIFI, web: { on: true, title: 'CSS452 Practical', pot: true, volt: true, potPin: 'A5', btn: true, btnPin: 34, outputs: [{ pin: 16 }, { pin: 17 }, { pin: 27 }], allOff: true, refresh: 3 } } },
+  mock13: { name: 'Mock 1.3 · MQTT topic router', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_YourStudentID', pub: true, pubTopic: 'CSS452/YourStudentID/pot', pubSrc: 'pot', pubPin: 'A4', pubMs: 2000, sub: true, subTopic: 'CSS452/YourStudentID/#', routes: [{ topic: 'CSS452/YourStudentID/led1', action: 'onoff', led: 16, thr: 500, ledLow: false }, { topic: 'CSS452/YourStudentID/pot', action: 'threshold', led: 17, thr: 2000, ledLow: false }], status: true, statusTopic: 'CSS452/YourStudentID/status', statusMsg: 'online' } } },
+};
+const PRESET_GROUPS = [
+  ['Lecture 3 · GPIO, analog, touch, WiFi', ['ex1', 'l3pot', 'hw1p1', 'hw1p2', 'hw1p3', 'softap']],
+  ['Lecture 4 · Multitasking & deep sleep', ['l4ex1', 'ex2', 'l4ex3', 'hw2p1', 'l4timer', 'l4touch', 'hw2p2', 'l4ext1', 'hw2p3']],
+  ['Lecture 5 · Web servers & clients', ['ex3', 'hw3p1', 'hw3p2', 'hw3p3']],
+  ['Lecture 6 · MQTT', ['ex4pub', 'ex4sub', 'hw4p1', 'hw4p2n1', 'hw4p2n2']],
+  ['Practical mock exam', ['mock11', 'mock12', 'mock13']],
+];
+
+/* ===================== Cheat-sheet entries ===================== */
+const GROUPS = [
+  { id: 'l3', title: 'Lecture 3', sub: 'GPIO, analog, PWM, touch, WiFi' },
+  { id: 'l4', title: 'Lecture 4', sub: 'Timers, interrupts, FreeRTOS, deep sleep' },
+  { id: 'l5', title: 'Lecture 5', sub: 'Web server and web client' },
+  { id: 'l6', title: 'Lecture 6', sub: 'MQTT publish / subscribe' },
+  { id: 'mock', title: 'Practical mock', sub: 'Mock Exam/Practical, problems 1.1–1.3' },
+];
+
+const ENTRIES = [
+  {
+    id: 'ex1', group: 'l3', tags: ['Exercise 1', 'L3 Ex 1'], title: 'Button controls an LED',
+    task: 'Press the switch → LED on. Not pressed → LED off.',
+    codes: [['', 'ex1']],
+    ideas: [
+      'The 10 kΩ resistor from 3V3 holds GPIO34 HIGH while the switch is open. This is a <b>pull-up</b>.',
+      'Pressing the switch joins the pin straight to GND, so <b>pressed reads LOW</b>. That is why the test is <code>== LOW</code>.',
+      'GPIO34–39 are input-only and have no internal pull-ups, so the external 10 kΩ is required.',
+      'LED long leg (anode, +) goes to the GPIO; short leg goes through 330 Ω to GND. HIGH = on.',
+    ],
+    variants: [
+      'LED on while <i>not</i> pressed: swap HIGH and LOW in the two <code>digitalWrite</code> lines.',
+      'Different pins: change only the <code>const int</code> lines at the top.',
+      'No resistor available and the pin is below 34: use <code>pinMode(pin, INPUT_PULLUP)</code>.',
+    ],
+  },
+  {
+    id: 'l3pot', group: 'l3', tags: ['L3 Ex 2 · 4 · 5'], title: 'Read the potentiometer and touch pin',
+    task: 'Print the analog value of a potentiometer on A0 and the touch value of a wire on GPIO32 to the Serial Monitor every second.',
+    codes: [['', 'l3pot']],
+    ideas: [
+      '<code>analogRead()</code> is 12-bit: 0 V → 0, 3.3 V → 4095.',
+      'Pot wiring: outer legs to 3V3 and GND, <b>middle leg (wiper)</b> to A0 = GPIO36.',
+      '<code>touchRead()</code> is high when untouched and drops when a finger touches the wire.',
+      '<code>hallRead()</code> (Ex 5) only exists on ESP32 core 2.x. It was removed in core 3.x.',
+      '<code>ESP.restart()</code> is a software reset: <code>setup()</code> runs again.',
+    ],
+    variants: ['Print only when the value changes by more than ~50 (noise).', 'Show percentage: <code>map(v, 0, 4095, 0, 100)</code>.'],
+  },
+  {
+    id: 'hw1p1', group: 'l3', tags: ['Homework 1 P1', 'L3 Ex 3'], title: 'Potentiometer sets LED brightness (PWM)',
+    task: 'Adjust the brightness of the LED by rotating the potentiometer.',
+    codes: [['', 'hw1p1']],
+    ideas: [
+      'Read 0–4095, then <code>map()</code> to 0–255 because PWM resolution is 8 bits.',
+      'Core 3.x (your repo): <code>ledcAttach(pin, freq, res)</code> then <code>ledcWrite(pin, duty)</code>.',
+      'Core 2.x (lecture slides): <code>ledcSetup(ch, freq, res)</code>, <code>ledcAttachPin(pin, ch)</code>, <code>ledcWrite(ch, duty)</code>. Switch “PWM API” in the builder.',
+      'PWM pins: any output pin (not 34–39).',
+    ],
+    variants: ['Reverse direction: <code>map(potValue, 0, 4095, 255, 0)</code>.', 'Two LEDs, opposite brightness: second <code>ledcAttach</code> + reversed map.', 'LED fully on above a threshold: use the “Pot threshold → LED” block.'],
+  },
+  {
+    id: 'hw1p2', group: 'l3', tags: ['Homework 1 P2', 'L3 Ex 8'], title: 'Date and time from an NTP server',
+    task: 'The Serial Monitor shows the local time every one second. The ESP32 must connect to your WiFi to reach the internet.',
+    codes: [['', 'hw1p2']],
+    ideas: [
+      '<code>configTime(gmtOffset, dstOffset, server)</code> syncs once; Thailand is GMT+7 = 25200 s.',
+      'After syncing, the internal clock keeps time, so WiFi is switched off to save power.',
+      'Format codes: <code>%A</code> weekday, <code>%B</code> month, <code>%d</code> day, <code>%Y</code> year, <code>%H:%M:%S</code> time.',
+      'Uses the phone hotspot: it must be <b>2.4 GHz</b> (iPhone: turn on “Maximize Compatibility”).',
+    ],
+    variants: ['Only the time: <code>"%H:%M:%S"</code>.', 'Print every 5 s: change the interval in the NTP block.'],
+  },
+  {
+    id: 'hw1p3', group: 'l3', tags: ['Homework 1 P3'], title: 'WiFi connect, then touch the wire to restart',
+    task: 'On start, connect to WiFi and show the IP address. Afterwards, touching the wire restarts the ESP32.',
+    codes: [['', 'hw1p3']],
+    ideas: [
+      'Connection code lives in <code>setup()</code>, so it runs again after every restart.',
+      'Touch pins: 0, 2, 4, 12, 13, 14, 15, 27, 32, 33 (GPIO32 = T9).',
+      'Pick the threshold by printing <code>touchRead()</code> first: untouched is often 50–80, touched under 20.',
+    ],
+    variants: ['Touch → LED on instead of restart: Touch block action “LED on while touched”.', 'Touch → deep sleep: add the deep-sleep block.'],
+  },
+  {
+    id: 'softap', group: 'l3', tags: ['L3 Ex 7'], title: 'ESP32 as its own WiFi access point',
+    task: 'Create a WiFi network from the ESP32 and print how many devices are connected.',
+    codes: [['', 'softap']],
+    ideas: ['<code>WiFi.softAP(ssid, password)</code>: the password needs at least 8 characters.', 'The ESP32\'s IP in AP mode is usually 192.168.4.1.', 'No internet in AP mode, so NTP, ThingSpeak and MQTT will not work.'],
+    variants: ['Combine with the web server: phones join the ESP32 network and open 192.168.4.1.'],
+  },
+  {
+    id: 'l4ex1', group: 'l4', tags: ['L4 Ex 1'], title: 'Blink with millis() while reading a button',
+    task: 'LED1 on 2 s / off 2 s (timing-based). LED2 on while SW is pressed (event-based). Both at once.',
+    codes: [['', 'l4ex1']],
+    ideas: [
+      '<code>delay()</code> blocks: the button would be ignored during the wait.',
+      '<code>millis()</code> = ms since boot. Pattern: <code>if (now - previous &gt;= interval) { previous = now; … }</code>.',
+      'Unsigned subtraction keeps working when millis() wraps after ~49 days.',
+    ],
+    variants: ['Different on/off times: keep two constants and choose <code>interval = ledState ? onTime : offTime</code>.', 'Blink faster: change <code>interval</code>.'],
+  },
+  {
+    id: 'ex2', group: 'l4', tags: ['Exercise 2', 'L4 Ex 2'], title: 'Blink + button toggles LED via interrupt',
+    task: 'LED1 on 2 s / off 2 s. LED2 is toggled each time SW is pressed.',
+    codes: [['', 'ex2']],
+    ideas: [
+      '<code>attachInterrupt(digitalPinToInterrupt(pin), ISR, mode)</code> goes in <code>setup()</code>.',
+      'Modes: LOW, HIGH, CHANGE, <b>FALLING</b> (HIGH→LOW, the moment of pressing), RISING (release).',
+      'Keep the ISR short. Variables changed in an ISR should be <code>volatile</code>.',
+      'Any GPIO except 6–11 can be an interrupt pin.',
+      'Real switches bounce: if one press toggles twice, tick “debounce”.',
+    ],
+    variants: ['Toggle on release: RISING.', 'Count presses: <code>volatile int count</code>, <code>count++</code> in the ISR, print it in loop().'],
+  },
+  {
+    id: 'l4ex3', group: 'l4', tags: ['L4 Ex 3 · 4'], title: 'Same two jobs as FreeRTOS tasks',
+    task: 'Task 1: LED1 on 2 s / off 2 s. Task 2: LED2 on while SW is pressed. Let the ESP32 schedule them.',
+    codes: [['', 'l4ex3']],
+    ideas: [
+      'Each task is a function with an endless <code>for (;;)</code> loop and <code>vTaskDelete(NULL)</code> after it.',
+      '<code>xTaskCreate(fn, "name", stack, param, priority, handle)</code> in <code>setup()</code>; <code>loop()</code> stays empty.',
+      'Ex 4: print <code>xPortGetCoreID()</code> to see which core runs the task.',
+      'The short <code>delay()</code> inside each task lets the other tasks and the watchdog run.',
+    ],
+    variants: ['Higher priority for the button task: change the 5th argument from 1 to 2.'],
+  },
+  {
+    id: 'hw2p1', group: 'l4', tags: ['Homework 2 P1', 'L4 Ex 5'], title: 'Tasks pinned to core 0 and core 1',
+    task: 'Serial Monitor shows which core runs each task. LED1 on 2 s / off 2 s. LED2 on while SW is pressed.',
+    codes: [['', 'hw2p1']],
+    ideas: [
+      '<code>xTaskCreatePinnedToCore(…, core)</code>: the 7th argument is the core (0 or 1).',
+      'TimerLED on core 0, SwitchLED on core 1: they run truly in parallel.',
+      '<code>loop()</code> itself runs on core 1.',
+    ],
+    variants: ['Swap cores: change the last argument of each call.'],
+  },
+  {
+    id: 'l4timer', group: 'l4', tags: ['L4 Ex 6 · 7'], title: 'Deep sleep with timer wake-up',
+    task: 'Stay awake 10 s, deep-sleep, wake up by itself after 5 s. Print the boot number each time.',
+    codes: [['', 'l4timer']],
+    ideas: [
+      'Deep sleep turns off the CPU and RAM. Waking up runs <code>setup()</code> from the top, like a reset.',
+      '<code>RTC_DATA_ATTR</code> variables live in RTC memory and survive deep sleep (the boot counter).',
+      'Timer wake-up takes <b>microseconds</b>: seconds × 1,000,000.',
+      '<code>loop()</code> is never reached.',
+    ],
+    variants: ['Sleep 30 s: <code>#define TIME_TO_SLEEP 30</code>.', 'Tick “print wake-up reason” to show what woke it.'],
+  },
+  {
+    id: 'l4touch', group: 'l4', tags: ['L4 Ex 8'], title: 'Touch wake-up',
+    task: 'Deep-sleep after 10 s; touching the wire on GPIO32 wakes the ESP32.',
+    codes: [['', 'l4touch']],
+    ideas: ['<code>touchAttachInterrupt(pin, callback, Threshold)</code> + <code>esp_sleep_enable_touchpad_wakeup()</code>.', 'The callback can be empty, but it must exist.', 'Higher threshold = more sensitive.'],
+    variants: ['Different touch pin: any of 0, 2, 4, 12–15, 27, 32, 33.'],
+  },
+  {
+    id: 'hw2p2', group: 'l4', tags: ['Homework 2 P2', 'L4 Ex 9'], title: 'ext0 wake-up with a button',
+    task: 'Serial Monitor shows the ESP32 entering deep sleep. Pressing SW wakes it up.',
+    codes: [['', 'hw2p2']],
+    ideas: [
+      '<code>esp_sleep_enable_ext0_wakeup(GPIO_NUM_32, LOW)</code>: one RTC pin, wake on a level.',
+      'Button with pull-up: pressed = LOW, so wake on LOW.',
+      'RTC pins: 0, 2, 4, 12–15, 25–27, 32–39.',
+    ],
+    variants: ['Wake on HIGH: wire the switch to 3V3 with a 10k pull-down, use <code>HIGH</code>.'],
+  },
+  {
+    id: 'l4ext1', group: 'l4', tags: ['L4 Ex 10'], title: 'ext1 wake-up with two pins',
+    task: 'Wake from deep sleep when the button on GPIO2 or GPIO32 is pressed.',
+    codes: [['', 'l4ext1']],
+    ideas: [
+      'ext1 takes a <b>bitmask</b>: add 2<sup>GPIO</sup> for each pin. 2<sup>2</sup> + 2<sup>32</sup> = 0x100000004.',
+      '<code>ESP_EXT1_WAKEUP_ANY_HIGH</code>: any pin HIGH wakes it, so wire those buttons with pull-<b>downs</b>.',
+      '<code>ESP_EXT1_WAKEUP_ALL_LOW</code>: wakes only when all listed pins are LOW.',
+    ],
+    variants: ['Pins 33 and 25: mask = 2<sup>33</sup> + 2<sup>25</sup> = 0x202000000. The builder computes this for you.'],
+  },
+  {
+    id: 'hw2p3', group: 'l4', tags: ['Homework 2 P3'], title: 'SW1 interrupt → deep sleep, timer wakes after 15 s',
+    task: 'Same as HW2 P1, plus: pressing SW1 (GPIO26) sends the ESP32 to deep sleep using a pin-change interrupt; it wakes 15 s later by timer.',
+    codes: [['', 'hw2p3']],
+    ideas: [
+      'The ISR only sets <code>sleepRequested = true</code>. Sleeping inside an ISR is unsafe.',
+      '<code>loop()</code> checks the flag, prints, waits 100 ms for Serial, then <code>esp_deep_sleep_start()</code>.',
+      'After waking, everything starts again: tasks are created again in <code>setup()</code>.',
+    ],
+    variants: ['Wake with SW instead of the timer: wake source ext0 on GPIO34, LOW.', 'Sleep 30 s: change the timer seconds.'],
+  },
+  {
+    id: 'ex3', group: 'l5', tags: ['Exercise 3', 'L5 §3'], title: 'Web server with ON/OFF buttons for two LEDs',
+    task: 'Turn LED1 (GPIO26) and LED2 (GPIO27) on and off from buttons on a web page.',
+    codes: [['', 'ex3']],
+    ideas: [
+      'Station mode joins your hotspot; open the printed IP in a browser on the <b>same</b> network.',
+      'A button is a link: clicking ON requests <code>GET /26/on</code>. The code finds it with <code>header.indexOf()</code>.',
+      'An empty line ends the request. The reply is: status line, headers, blank line, HTML.',
+      'The page shows ON when the output is off and OFF when it is on.',
+    ],
+    variants: ['More LEDs: add output rows in the Web block (HW3 P3).', 'Active-LOW (LED from 3V3): tick “active LOW” per output.'],
+  },
+  {
+    id: 'hw3p1', group: 'l5', tags: ['Homework 3 P1', 'L5 §4'], title: 'Web server shows the potentiometer value',
+    task: 'Show the potentiometer value on a web page; it updates when you refresh the browser.',
+    codes: [['', 'hw3p1']],
+    ideas: ['<code>analogRead()</code> runs on every page request, so a refresh shows the new value.', 'The pot must be on an ADC1 pin (32–39): ADC2 cannot read while WiFi is on.'],
+    variants: ['Auto-refresh every 5 s: set “auto refresh” in the Web block.', 'Show the pot and also control LEDs on the same page: add outputs.'],
+  },
+  {
+    id: 'hw3p2', group: 'l5', tags: ['Homework 3 P2', 'L5 §5.2'], title: 'Send data to ThingSpeak (web client)',
+    task: 'Show the potentiometer value and a random number on ThingSpeak charts.',
+    codes: [['', 'hw3p2']],
+    ideas: [
+      'Here the ESP32 is the <b>client</b>: it sends <code>GET /update?api_key=…&amp;field1=…&amp;field2=…</code>.',
+      'Use the channel\'s <b>Write</b> API key.',
+      'Free ThingSpeak accepts one update every 15 s. The lecture\'s 10 s works only every other time.',
+      'Response 200 = accepted. A negative code means no connection.',
+    ],
+    variants: ['Add a third field (touch value): set Field 3 in the ThingSpeak block.'],
+  },
+  {
+    id: 'hw3p3', group: 'l5', tags: ['Homework 3 P3'], title: 'Web server with three LED buttons',
+    task: 'LEDs on GPIO16, 17, 32 (long leg → GPIO, 330 Ω → GND). A web page with three buttons turns each on/off.',
+    codes: [['', 'hw3p3']],
+    note: 'Check your repo copy. The homework diagram wires each LED as active-HIGH (long leg → GPIO, 330 Ω → GND), but <code>P3_WebServer_ControlOutputs.ino</code> writes LOW for “on”. With that wiring the LEDs light when the page says “off”. The version here uses HIGH = on, which matches the diagram.',
+    ideas: ['Same pattern as Exercise 3, repeated for each pin: a state string, two <code>indexOf</code> checks, one button block.', 'GPIO32 works as an output; only 34–39 are input-only.'],
+    variants: ['Add an “all off” link: check <code>GET /all/off</code> and write LOW to every output.'],
+  },
+  {
+    id: 'ex4', group: 'l6', tags: ['Exercise 4', 'L6 §3'], title: 'MQTT: pot on one board lights an LED on another',
+    task: 'Two ESP32s. Turning the publisher\'s potentiometer turns the subscriber\'s LED on (value > 500) and off.',
+    codes: [['Publisher node', 'ex4pub'], ['Subscriber node', 'ex4sub']],
+    ideas: [
+      'Both boards connect to the same public broker (broker.hivemq.com:1883) and the same <b>topic</b>.',
+      'Each board needs a <b>different client ID</b>. Two clients with the same ID keep kicking each other off.',
+      'Payloads are text: <code>dtostrf()</code> turns the number into text; the subscriber rebuilds a String and calls <code>toInt()</code>.',
+      '<code>ClientESP.loop()</code> must run often: it keeps the connection alive and calls <code>callback()</code>.',
+      'Library: install “PubSubClient” by Nick O\'Leary before the exam.',
+    ],
+    variants: ['Different threshold: change 500.', 'Send "on"/"off" text instead: subscriber action “on/off text”.', 'Brightness instead of on/off: subscriber action “PWM brightness”.'],
+  },
+  {
+    id: 'hw4p1', group: 'l6', tags: ['Homework 4 P1', 'L6 §4'], title: 'One board publishes and subscribes',
+    task: 'One ESP32 with a pot and an LED: rotating the pot turns the LED on/off through the broker.',
+    codes: [['', 'hw4p1']],
+    ideas: ['Publish and subscribe on the same topic, so the board receives its own messages.', 'Setup order: WiFi → <code>setServer</code> → <code>setCallback</code> → connect → subscribe.'],
+    variants: ['Two LEDs with two thresholds: add an <code>else if</code> in the callback.'],
+  },
+  {
+    id: 'hw4p2', group: 'l6', tags: ['Homework 4 P2'], title: 'Two boards control each other',
+    task: 'Node1\'s pot turns Node2\'s LED on/off, and Node2\'s pot turns Node1\'s LED on/off.',
+    codes: [['Node1', 'hw4p2n1'], ['Node2', 'hw4p2n2']],
+    ideas: ['Each node publishes on its <b>own</b> topic and subscribes to the <b>other</b> node\'s topic.', 'Only three lines differ: ClientID, PubTopic, SubTopic. The builder\'s “Swap Node1/Node2” button flips them.'],
+    variants: ['Three nodes: each subscribes with a wildcard like <code>IoT/+</code> and ignores its own topic.'],
+  },
+  {
+    id: 'mock11', group: 'mock', tags: ['Mock 1.1', 'L4'], title: 'Snooze lamp: pot speed, toggle, deep sleep with two wake-ups',
+    task: 'LED1 blinks with on/off time = map(pot, 0, 4095, 200, 2000) ms (no delay). SW toggles LED2 by interrupt. SW1 turns the LEDs off and deep-sleeps; wake after 10 s OR when SW is pressed. Print boot number and wake-up cause.',
+    codes: [['', 'mock11']],
+    ideas: [
+      'Enable <b>both</b> wake sources before sleeping: <code>esp_sleep_enable_timer_wakeup()</code> and <code>esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, LOW)</code>. The first one to happen wins.',
+      'Recalculate <code>interval</code> from the pot in every pass of <code>loop()</code>, then use the normal <code>millis()</code> check.',
+      'SW1\'s ISR only sets a flag; <code>loop()</code> turns the LEDs off and calls <code>esp_deep_sleep_start()</code>.',
+      'GPIO34 works for ext0 because it is an RTC pin; GPIO16 would not.',
+    ],
+    variants: ['Wake only by SW: untick Timer in the builder.', 'Use ext1 with two buttons: tick “Several pins (ext1)”.'],
+  },
+  {
+    id: 'mock12', group: 'mock', tags: ['Mock 1.2', 'L5'], title: 'Control panel web server: voltage, ALL OFF, safe refresh',
+    task: 'Table with pot raw value, voltage (2 decimals) and switch state; ON/OFF buttons for LEDs on 16, 17, 27; a red ALL OFF button; auto-refresh every 3 s that never repeats the last button.',
+    codes: [['', 'mock12']],
+    ideas: [
+      'Voltage: <code>String(analogRead(potPin) * 3.3 / 4095.0, 2)</code>. Use 4095.0 so the maths is floating point.',
+      'ALL OFF is just another link: check <code>header.indexOf("GET /all/off")</code> and switch every output off, including its state string.',
+      '<code>&lt;meta http-equiv="refresh" content="3; url=/"&gt;</code> reloads the root page. Without <code>url=/</code> the browser re-sends the last action, e.g. <code>/16/off</code>.',
+      'Pot on A5 = GPIO33 (ADC1), so it reads fine while WiFi is on.',
+    ],
+    variants: ['Reorder table and buttons: use ▲▼ in the builder\'s web page preview.', 'Show uptime too: tick “Uptime (s)”.'],
+  },
+  {
+    id: 'mock13', group: 'mock', tags: ['Mock 1.3', 'L6'], title: 'MQTT topic router: one wildcard subscription, act per topic',
+    task: 'Publish the pot every 2 s to CSS452/<ID>/pot and "online" to CSS452/<ID>/status on connect. Subscribe once to CSS452/<ID>/#: .../pot drives LED2 (> 2000), .../led1 "on"/"off" drives LED1, other topics do nothing.',
+    codes: [['', 'mock13']],
+    ideas: [
+      'In the callback, turn the topic into a <code>String</code> and compare it: <code>if (t == PubTopic) … else if (t == Route1Topic) …</code>.',
+      'Check the topic <b>before</b> calling <code>toInt()</code>: the board also receives its own <code>status</code> message.',
+      'LED2 must use the value received from the broker, not a local <code>analogRead()</code>.',
+      'Test with the HiveMQ WebSocket client (port 8884): subscribe to <code>CSS452/&lt;ID&gt;/#</code> and publish to <code>.../led1</code>.',
+    ],
+    variants: ['Add a third topic: “+ Act per topic” in the builder adds another route.', 'Brightness instead of on/off: set a route to “LED brightness from value”.'],
+  },
+];
+
+</script>
+<script>
+/* ===================== helpers ===================== */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+/* ---------- C++ highlighter ---------- */
+const KW = new Set('void int long unsigned const char bool boolean float double byte String if else for while return break case switch default volatile static struct true false NULL'.split(' '));
+const CONSTS = /^(HIGH|LOW|INPUT|OUTPUT|INPUT_PULLUP|FALLING|RISING|CHANGE|WIFI_STA|WIFI_OFF|WL_CONNECTED|A0|GPIO_NUM_\d+|ESP_\w+|RTC_DATA_ATTR|IRAM_ATTR|TIME_TO_SLEEP|Threshold)$/;
+function highlight(code) {
+  const re = /(\/\/.*$)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])+')|(#\s*\w+)|(\b0x[0-9A-Fa-f]+\b|\b\d+(?:\.\d+)?(?:ULL|UL|L)?\b)|([A-Za-z_]\w*)/gm;
+  let out = '', last = 0, m;
+  while ((m = re.exec(code))) {
+    out += esc(code.slice(last, m.index));
+    const t = m[0];
+    let cls = null;
+    if (m[1]) cls = 'com'; else if (m[2] || m[3]) cls = 'str'; else if (m[4]) cls = 'pre'; else if (m[5]) cls = 'num';
+    else if (m[6]) {
+      if (KW.has(t)) cls = 'kw'; else if (CONSTS.test(t)) cls = 'const';
+      else if (code[re.lastIndex] === '(' || /^\s*\(/.test(code.slice(re.lastIndex, re.lastIndex + 2))) cls = 'fn';
+    }
+    out += cls ? `<span class="tok-${cls}">${esc(t)}</span>` : esc(t);
+    last = re.lastIndex;
+  }
+  return out + esc(code.slice(last));
+}
+
+async function copyText(text, btn) {
+  const old = btn.textContent;
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+  catch (e) {
+    const pre = btn.closest('.codebox')?.querySelector('pre');
+    if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    btn.textContent = 'Selected: press Ctrl/Cmd+C';
+  }
+  setTimeout(() => { btn.textContent = old; }, 1600);
+}
+
+/* ===================== wiring diagrams ===================== */
+function wiringSVG(parts) {
+  if (!parts.length) return '<p class="hint">Nothing to wire: this sketch only uses the board and USB.</p>';
+  let y = 4, body = '';
+  const W = 540;
+  const charW = 7.2;
+  const tag = (x, cy, text, kind) => { const w = Math.round(text.length * charW + 18); return { w, s: `<rect class="tag-${kind}" x="${x}" y="${cy - 11}" width="${w}" height="22" rx="11"/><text class="mono" x="${x + w / 2}" y="${cy + 4}" text-anchor="middle">${esc(text)}</text>` }; };
+  const ln = (x1, y1, x2, y2, c) => `<path class="w-${c}" d="M${x1} ${y1}L${x2} ${y2}"/>`;
+  const res = (x, cy, label, vertical) => vertical
+    ? `<path class="part" d="M${x} ${cy}l0 4l-6 4l12 8l-12 8l12 8l-12 8l6 4l0 0"/><text x="${x + 12}" y="${cy + 26}">${label}</text>`
+    : `<path class="part" d="M${x} ${cy}l4 0l4 -6l8 12l8 -12l8 12l8 -12l4 6l4 0"/><text x="${x + 24}" y="${cy - 12}" text-anchor="middle">${label}</text>`;
+  const led = (x, cy, label) => `<path class="led-body" d="M${x} ${cy - 10}L${x + 20} ${cy}L${x} ${cy + 10}Z"/><path class="part" d="M${x + 20} ${cy - 11}L${x + 20} ${cy + 11}"/><path class="led-ray" d="M${x + 12} ${cy - 13}l7 -8m-4 0l4 0l0 4M${x + 19} ${cy - 11}l7 -8m-4 0l4 0l0 4"/><text x="${x + 10}" y="${cy + 26}" text-anchor="middle">${esc(label)}</text><text class="small" x="${x - 4}" y="${cy - 14}" text-anchor="end">+ long leg</text>`;
+  const gnd = (x, cy) => `${ln(x, cy, x, cy + 10, 'gnd')}<path class="part" d="M${x - 10} ${cy + 10}h20M${x - 6} ${cy + 14}h12M${x - 2} ${cy + 18}h4"/>`;
+  const dot = (x, cy) => `<circle class="dot" cx="${x}" cy="${cy}" r="3.2"/>`;
+  const swV = (x, y1, label) => `<circle class="dot" cx="${x}" cy="${y1}" r="2.4"/><circle class="dot" cx="${x}" cy="${y1 + 24}" r="2.4"/><path class="part" d="M${x} ${y1}L${x - 11} ${y1 + 20}"/><text x="${x - 24}" y="${y1 + 16}" text-anchor="end">${esc(label)}</text>`;
+  const swH = (x, cy, label) => `<circle class="dot" cx="${x}" cy="${cy}" r="2.4"/><circle class="dot" cx="${x + 26}" cy="${cy}" r="2.4"/><path class="part" d="M${x} ${cy}L${x + 22} ${cy - 11}"/><text x="${x + 13}" y="${cy - 16}" text-anchor="middle">${esc(label)}</text>`;
+  const note = (cy, text) => `<text class="note-text" x="${W - 6}" y="${cy + 4}" text-anchor="end">${esc(text)}</text>`;
+  const gp = p => 'GPIO' + p.pin + (p.alias ? ' · ' + p.alias : '');
+
+  for (const p of parts) {
+    let h, s = '';
+    if (p.type === 'led') {
+      h = 58; const cy = 26; const t = tag(4, cy, gp(p), 'gpio');
+      s += t.s + ln(4 + t.w, cy, 168, cy, 'sig') + led(168, cy, p.label) + ln(188, cy, 222, cy, 'gnd') + res(222, cy, '330 Ω') + ln(266, cy, 300, cy, 'gnd') + gnd(300, cy)
+        + `<text class="small" x="314" y="${cy + 22}">GND</text>` + note(cy, 'HIGH = on');
+    } else if (p.type === 'ledLow') {
+      h = 58; const cy = 26; const t = tag(4, cy, '3V3', 'pwr');
+      s += t.s + ln(4 + t.w, cy, 80, cy, 'pwr') + res(80, cy, '330 Ω') + ln(124, cy, 168, cy, 'pwr') + led(168, cy, p.label) + ln(188, cy, 232, cy, 'sig') + tag(232, cy, gp(p), 'gpio').s + note(cy, 'LOW = on');
+    } else if (p.type === 'btn') {
+      h = 104; const cy = 26; const t = tag(4, cy, '3V3', 'pwr');
+      s += t.s + ln(4 + t.w, cy, 80, cy, 'pwr') + res(80, cy, '10 kΩ') + ln(124, cy, 200, cy, 'sig') + dot(200, cy) + ln(200, cy, 236, cy, 'sig') + tag(236, cy, gp(p), 'gpio').s
+        + ln(200, cy, 200, cy + 18, 'gnd') + swV(200, cy + 18, p.label) + ln(200, cy + 42, 200, cy + 56, 'gnd') + gnd(200, cy + 56)
+        + `<text class="small" x="216" y="${cy + 76}">GND</text>` + note(cy, 'open = HIGH') + note(cy + 18, 'pressed = LOW');
+    } else if (p.type === 'btnDown') {
+      h = 112; const cy = 26; const t = tag(4, cy, '3V3', 'pwr');
+      s += t.s + ln(4 + t.w, cy, 96, cy, 'pwr') + swH(96, cy, p.label) + ln(122, cy, 200, cy, 'sig') + dot(200, cy) + ln(200, cy, 236, cy, 'sig') + tag(236, cy, gp(p), 'gpio').s
+        + ln(200, cy, 200, cy + 14, 'gnd') + res(200, cy + 14, '10 kΩ', true) + ln(200, cy + 58, 200, cy + 64, 'gnd') + gnd(200, cy + 64)
+        + `<text class="small" x="216" y="${cy + 84}">GND</text>` + note(cy, 'open = LOW') + note(cy + 18, 'pressed = HIGH');
+    } else if (p.type === 'pot') {
+      h = 92; const cy = 30; const t = tag(4, cy, '3V3', 'pwr');
+      s += t.s + ln(4 + t.w, cy, 100, cy, 'pwr') + `<rect class="part" x="100" y="${cy - 8}" width="64" height="16" rx="2"/><text x="132" y="${cy - 14}" text-anchor="middle">${esc(p.label)} (10 kΩ)</text>`
+        + ln(164, cy, 214, cy, 'gnd') + gnd(214, cy) + `<text class="small" x="228" y="${cy + 22}">GND</text>`
+        + `<path class="part" d="M132 ${cy + 36}V${cy + 12}m-5 6l5 -6l5 6"/>` + ln(132, cy + 36, 236, cy + 36, 'sig') + tag(236, cy + 36, gp(p), 'gpio').s
+        + `<text class="small" x="126" y="${cy + 30}" text-anchor="end">middle leg</text>` + note(cy, '0 V → 0') + note(cy + 18, '3.3 V → 4095');
+    } else if (p.type === 'touch') {
+      h = 50; const cy = 24; const t = tag(4, cy, gp(p), 'gpio');
+      s += t.s + ln(4 + t.w, cy, 168, cy, 'sig') + `<circle class="open" cx="174" cy="${cy}" r="6"/><text x="190" y="${cy + 4}">bare jumper wire: touch here</text>` + note(cy, 'touched = low value');
+    }
+    body += `<g class="wrow" data-b="${(p.blocks || []).join(' ')}" transform="translate(0 ${y})"><rect class="rowbg" x="0" y="-4" width="${W}" height="${h + 8}" rx="6"/>${s}</g>`;
+    y += h + 10;
+  }
+  return `<svg class="wiring" viewBox="0 0 ${W} ${y}" role="img" aria-label="Wiring diagram">${body}</svg>
+  <div class="legend"><span><i style="background:var(--w-pwr)"></i>3V3</span><span><i style="background:var(--w-gnd)"></i>GND</span><span><i style="background:var(--w-sig)"></i>signal to GPIO</span></div>`;
+}
+
+function pinTable(parts) {
+  if (!parts.length) return '<p class="hint">No external parts.</p>';
+  const desc = p => ({
+    btn: [`Push button ${p.label}`, 'Pin ← 10 kΩ ← 3V3; switch from pin to GND'],
+    btnDown: [`Push button ${p.label}`, 'Pin → 10 kΩ → GND; switch from pin to 3V3'],
+    pot: ['Potentiometer middle leg', 'Outer legs: 3V3 and GND'],
+    touch: ['Bare jumper wire', 'Nothing else; touch the free end'],
+    led: [`${p.label} long leg (+)`, 'Short leg → 330 Ω → GND'],
+    ledLow: [`${p.label} short leg (−)`, 'Long leg → 330 Ω → 3V3'],
+  }[p.type]);
+  return `<table class="pins"><thead><tr><th>Pin</th><th>Connects to</th><th>Rest of the circuit</th></tr></thead><tbody>${
+    parts.map(p => { const [a, b] = desc(p); return `<tr><td>GPIO${p.pin}${p.alias ? ' (' + p.alias + ')' : ''}</td><td>${esc(a)}</td><td>${esc(b)}</td></tr>`; }).join('')}</tbody></table>`;
+}
+
+/* ===================== ESPino32 board ===================== */
+function boardSVG(used = {}) {
+  const rowH = 22, top = 46, n = BOARD.left.length, W = 760, H = top + n * rowH + 16;
+  const x0 = 318, x1 = 442, mid = (x0 + x1) / 2;
+  let s = `<rect class="b-board" x="${x0}" y="4" width="${x1 - x0}" height="${H - 8}" rx="12"/>
+    <text class="b-title" x="${x0 + 12}" y="27" text-anchor="start">ESPino32</text>
+    <circle class="b-led" cx="${x1 - 12}" cy="22" r="4"/><text class="b-small" x="${x1 - 20}" y="26" text-anchor="end">IO16</text>
+    <rect class="b-module" x="${x0 + 14}" y="40" width="${x1 - x0 - 28}" height="168" rx="4"/>
+    <rect class="b-shield" x="${x0 + 24}" y="70" width="${x1 - x0 - 48}" height="128" rx="3"/>
+    <text class="b-mod" x="${mid}" y="140" text-anchor="middle">ESP-WROOM-32</text>
+    <text class="b-small" x="${mid}" y="232" text-anchor="middle">ThaiEasyElec</text>
+    <rect class="b-btn" x="${mid - 40}" y="250" width="22" height="16" rx="3"/><rect class="b-btn" x="${mid + 18}" y="250" width="22" height="16" rx="3"/>
+    <text class="b-small" x="${mid - 29}" y="280" text-anchor="middle">RESET</text><text class="b-small" x="${mid + 29}" y="280" text-anchor="middle">PROGRAM</text>
+    <rect class="b-usb" x="${mid - 22}" y="${H - 34}" width="44" height="26" rx="3"/><text class="b-mod" x="${mid}" y="${H - 17}" text-anchor="middle">USB</text>`;
+  const row = (label, i, side) => {
+    if (label === null) return '';
+    const y = top + i * rowH, isPin = typeof label === 'number', g = isPin ? label : null;
+    const name = isPin ? 'GPIO' + String(g).padStart(2, '0') : label;
+    const cat = !isPin ? 'pwr' : PINS.FLASH.includes(g) ? 'flash' : PINS.STRAP.includes(g) ? 'strap' : 'gp';
+    const u = isPin && used[g];
+    const io = isPin ? (PINS.FLASH.includes(g) ? '' : PINS.INPUT_ONLY.includes(g) ? 'I' : 'I/O') : label === 'EN' ? 'I' : '';
+    const title = (isPin ? pinInfo(g) : label === 'EN' ? 'EN: reset (pull LOW to reset)' : label + ': power') + (u ? ' · used by ' + u.join(', ') : '');
+    const L = side === 'L';
+    const hole = L ? x0 + 8 : x1 - 8, bx = L ? 230 : 458, iox = L ? 214 : 546, cx = L ? 124 : 562;
+    let chip = '';
+    if (isPin && L && GPIO_ANALOG[g]) chip = `<rect class="chip ${ADC_CH[g][0] === '1' ? 'c-adc1' : 'c-adc2'}" x="${cx}" y="${y - 9}" width="74" height="18" rx="3"/><text x="${cx + 37}" y="${y + 4}" text-anchor="middle">${GPIO_ANALOG[g]} (${ADC_CH[g]})</text>`;
+    if (isPin && !L && BOARD.func[g]) chip = `<rect class="chip c-${BOARD.func[g][1]}" x="${cx}" y="${y - 9}" width="64" height="18" rx="3"/><text x="${cx + 32}" y="${y + 4}" text-anchor="middle">${BOARD.func[g][0]}</text>`;
+    const role = u ? `<text class="role" x="${L ? 118 : 632}" y="${y + 4}" text-anchor="${L ? 'end' : 'start'}">${esc(u.join(', '))}</text>` : '';
+    return `<g class="pinrow"><title>${esc(title)}</title>${role}${chip}<text class="io" x="${iox}" y="${y + 4}" text-anchor="middle">${io}</text>
+      <rect class="pb ${cat}${u ? ' used' : ''}" x="${bx}" y="${y - 9}" width="72" height="18" rx="3"/><text x="${bx + 36}" y="${y + 4}" text-anchor="middle">${name}</text>
+      <path class="pb ${cat}" d="M${L ? bx + 72 : bx} ${y}H${hole}" style="fill:none"/><circle class="b-hole" cx="${hole}" cy="${y}" r="3.2"/></g>`;
+  };
+  BOARD.left.forEach((l, i) => { s += row(l, i, 'L'); });
+  BOARD.right.forEach((l, i) => { s += row(l, i, 'R'); });
+  return `<svg class="board" viewBox="0 0 ${W} ${H}" role="img" aria-label="ESPino32 pinout">${s}</svg>`;
+}
+function boardLegend(withUsed) {
+  const k = (v, t, extra = '') => `<span><i style="border-color:var(${v});background:${extra || 'transparent'}"></i>${t}</span>`;
+  return (withUsed ? k('--accent', 'Used by this sketch', 'var(--accent)') : '') + k('--pin-adc1', 'ADC1 (works with WiFi)') + k('--pin-adc2', 'ADC2 (not with WiFi)') + k('--pin-uart', 'UART') + k('--pin-spi', 'SPI') + k('--pin-i2c', 'I2C') + k('--pin-pwr', 'Power / EN') + k('--pin-strap', 'Strapping pin (dashed)') + k('--pin-flash', 'SPI flash: do not use', 'var(--pin-flash)') + '<span>I = input only · I/O = input/output · A5 (1.5) = analog name (ADC unit.channel)</span>';
+}
+
+/* ===================== tabs ===================== */
+const TABS = ['cheat', 'builder', 'ref'];
+function showTab(t, push) {
+  if (!TABS.includes(t)) t = 'cheat';
+  TABS.forEach(x => { $('#tab-' + x).hidden = x !== t; $('#t-' + x).setAttribute('aria-selected', String(x === t)); });
+  document.body.classList.toggle('mode-builder', t === 'builder');
+  store.set('css452-tab', t);
+  if (push) { try { history.replaceState(null, '', '#' + t); } catch (e) {} }
+  window.scrollTo(0, 0);
+}
+document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab, true); });
+
+/* header height -> CSS var (builder panels fill the rest of the window) */
+(function () {
+  const hdr = document.querySelector('.top');
+  const set = () => document.documentElement.style.setProperty('--hdr', hdr.offsetHeight + 'px');
+  set();
+  if (window.ResizeObserver) new ResizeObserver(set).observe(hdr); else addEventListener('resize', set);
+})();
+
+/* ===================== cheat sheet ===================== */
+const cheatOpts = store.get('css452-cheat', { explain: true, pwmApi: 'v3' });
+$('#cheat-explain').checked = cheatOpts.explain;
+$('#cheat-pwm').value = cheatOpts.pwmApi;
+
+function renderToc() {
+  $('#toc').innerHTML = GROUPS.map(g => `<div class="g"><h4>${g.title}</h4><p>${g.sub}</p>${
+    ENTRIES.filter(e => e.group === g.id).map(e => `<a href="#e-${e.id}" data-jump="e-${e.id}">${esc(e.title)} <small>${esc(e.tags[0])}</small></a>`).join('')}</div>`).join('');
+}
+$('#toc').addEventListener('click', e => {
+  const a = e.target.closest('a[data-jump]'); if (!a) return;
+  e.preventDefault(); document.getElementById(a.dataset.jump)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+});
+
+function renderEntries() {
+  const opts = { explain: $('#cheat-explain').checked, pwmApi: $('#cheat-pwm').value };
+  let html = '';
+  for (const g of GROUPS) {
+    html += `<div class="group-head" id="g-${g.id}"><h2>${g.title}</h2><span>${g.sub}</span></div>`;
+    for (const e of ENTRIES.filter(x => x.group === g.id)) {
+      const results = e.codes.map(([label, key]) => [label, key, generate({ ...PRESETS[key].cfg, ...opts })]);
+      const wiring = results.map(([label, , r]) => `<div class="wiring-block">${label ? `<span class="sub">${esc(label)}</span>` : ''}${wiringSVG(r.parts)}<div class="table-wrap">${pinTable(r.parts)}</div></div>`).join('');
+      const codes = results.map(([label, key, r]) => `<div class="codebox"><div class="codebar"><span class="name">${esc(label || PRESETS[key].name)} · ${r.code.split('\n').length - 1} lines</span><button class="btn small" data-open="${key}">Open in builder</button><button class="btn small solid" data-copy>Copy</button></div><pre class="limit">${highlight(r.code)}</pre></div>`).join('');
+      html += `<article class="entry" id="e-${e.id}">
+        <header><div class="tags">${e.tags.map((t, i) => `<span class="tag${i === 0 ? ' primary' : ''}">${esc(t)}</span>`).join('')}</div><h3>${esc(e.title)}</h3></header>
+        <p class="task"><span class="lbl">Task</span>${esc(e.task)}</p>
+        ${e.note ? `<div class="callout warn"><b>Heads up.</b> ${e.note}</div>` : ''}
+        <div class="entry-grid"><div>${wiring}</div>
+          <div><h4>Key ideas</h4><ul>${e.ideas.map(i => `<li>${i}</li>`).join('')}</ul>
+          <h4>If the exam changes it</h4><ul>${e.variants.map(i => `<li>${i}</li>`).join('')}</ul></div></div>
+        <div class="codes${results.length > 1 ? ' two' : ''}">${codes}</div>
+      </article>`;
+    }
+  }
+  $('#entries').innerHTML = html;
+}
+['#cheat-explain', '#cheat-pwm'].forEach(s => $(s).addEventListener('change', () => {
+  store.set('css452-cheat', { explain: $('#cheat-explain').checked, pwmApi: $('#cheat-pwm').value });
+  renderEntries();
+}));
+$('#entries').addEventListener('click', e => {
+  const c = e.target.closest('[data-copy]');
+  if (c) { copyText(c.closest('.codebox').querySelector('pre').innerText, c); return; }
+  const o = e.target.closest('[data-open]');
+  if (o) { loadPreset(o.dataset.open); showTab('builder', true); }
+});
+
+/* ===================== builder ===================== */
+let cfg = store.get('css452-builder', null);
+function normCfg(c) {
+  const sl = c.sleep;
+  [['wTimer', 'timer'], ['wExt0', 'ext0'], ['wExt1', 'ext1'], ['wTouch', 'touch']].forEach(([k, v]) => { if (sl[k] === undefined) sl[k] = sl.wake === v; });
+  return c;
+}
+cfg = normCfg(cfg ? makeConfig(cfg) : makeConfig(PRESETS.ex2.cfg));
+let presetKey = store.get('css452-preset', 'ex2');
+const openSecs = new Set(store.get('css452-open', ['global', 'leds']));
+
+function loadPreset(key) {
+  const keep = { studentId: cfg.studentId, explain: cfg.explain, pwmApi: cfg.pwmApi, ssid: cfg.wifi.ssid, pass: cfg.wifi.pass };
+  cfg = normCfg(makeConfig(PRESETS[key].cfg));
+  cfg.studentId = keep.studentId; cfg.explain = keep.explain; cfg.pwmApi = keep.pwmApi;
+  if (cfg.wifi.mode !== 'AP' && !/^Your /.test(keep.ssid)) { cfg.wifi.ssid = keep.ssid; cfg.wifi.pass = keep.pass; }
+  presetKey = key;
+  openSecs.clear(); openSecs.add('global');
+  const sec = sectionFor(cfg); if (sec) sec.forEach(s => openSecs.add(s));
+  renderControls(); update();
+}
+function sectionFor(c) {
+  const s = [];
+  if (c.holds.length || c.toggles.length || c.blinks.length) s.push('leds');
+  if (c.pwm.on || c.potLed.on || c.sensors.on || c.touch.on) s.push('analog');
+  if (c.sleep.on) s.push('sleep');
+  if (c.wifi.on || c.ntp.on || c.web.on || c.ts.on || c.mqtt.on) s.push('wifi');
+  if (c.web.on) s.push('web'); if (c.ts.on) s.push('ts'); if (c.mqtt.on) s.push('mqtt'); if (c.ntp.on) s.push('ntp');
+  return s;
+}
+
+const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
+const setP = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); const t = ks.reduce((a, k) => a[k], o); t[last] = v; };
+const fid = p => 'f-' + p.replace(/\./g, '-');
+const num = (p, label, extra = '') => extra === '__pin__' ? pinF(p, label) : `<label class="f">${label}<input type="number" id="${fid(p)}" data-p="${p}" value="${esc(getP(cfg, p))}" ${extra}></label>`;
+const txt = (p, label, grow = true) => `<label class="f${grow ? ' grow' : ''}">${label}<input type="text" id="${fid(p)}" data-p="${p}" value="${esc(getP(cfg, p))}" spellcheck="false" autocomplete="off"></label>`;
+const sel = (p, label, opts, grow) => `<label class="f${grow ? ' grow' : ''}">${label}<select id="${fid(p)}" data-p="${p}" data-re="1">${opts.map(([v, l]) => `<option value="${v}"${String(getP(cfg, p)) === String(v) ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`;
+const chk = (p, label) => `<label class="chk"><input type="checkbox" id="${fid(p)}" data-p="${p}" data-re="1"${getP(cfg, p) ? ' checked' : ''}> ${label}</label>`;
+const codeBtn = id => `<button type="button" class="code-btn" data-show="${id}" title="Highlight this block's code" aria-pressed="false">&lt;/&gt; code</button>`;
+const sec = (id, title, on, small, body, block) => `<details class="sec" data-sec="${id}"${block ? ` data-block="${block}"` : ''}${openSecs.has(id) ? ' open' : ''}><summary><span class="state${on ? ' on' : ''}"></span>${title}${small ? ` <small>${small}</small>` : ''}${block ? codeBtn(block) : ''}</summary><div class="body">${body}</div></details>`;
+const PIN_ATTR = '__pin__';
+const pinF = (p, label) => `<label class="f">${label}<input type="text" class="pin-in" id="${fid(p)}" data-p="${p}" data-pin="1" value="${esc(getP(cfg, p))}" spellcheck="false" autocomplete="off" autocapitalize="characters"><span class="pin-hint"></span></label>`;
+
+const ACTIONS = [['threshold', 'LED on if value > threshold'], ['onoff', 'LED on/off from "on"/"off" text'], ['pwm', 'LED brightness from value']];
+function routesHtml(m) {
+  return m.routes.map((r, i) => `<div class="item" data-block="mqtt-route-${i}"><div class="item-head"><b style="font-size:13px">Route ${i + 1}</b>${codeBtn('mqtt-route-' + i)}</div>
+    <div class="row">${txt(`mqtt.routes.${i}.topic`, 'When a message arrives on')}</div>
+    <div class="row">${sel(`mqtt.routes.${i}.action`, 'Do', ACTIONS)}${num(`mqtt.routes.${i}.led`, 'LED pin', PIN_ATTR)}${r.action === 'threshold' ? num(`mqtt.routes.${i}.thr`, 'Threshold') : ''}<button class="btn ghost small" data-act="del:mqtt.routes:${i}">Remove</button></div>
+    ${r.action !== 'pwm' ? `<div class="row">${chk(`mqtt.routes.${i}.ledLow`, 'LED active LOW')}</div>` : ''}</div>`).join('');
+}
+function renderControls() {
+  const c = cfg;
+  const presetOpts = PRESET_GROUPS.map(([g, keys]) => `<optgroup label="${esc(g)}">${keys.map(k => `<option value="${k}"${k === presetKey ? ' selected' : ''}>${esc(PRESETS[k].name)}</option>`).join('')}</optgroup>`).join('');
+  let h = `<div class="panel">
+    <h2>Build a sketch</h2>
+    <p class="hint">Start from the closest course sketch, then switch blocks on and change pins. Code, wiring and pin checks update as you type.</p>
+    <div class="row"><label class="f grow">Start from<select id="b-preset"><option value="blank"${presetKey === 'blank' ? ' selected' : ''}>Blank sketch</option>${presetOpts}</select></label>
+      <button class="btn" id="b-reload" title="Reset to the selected course sketch">Reload</button></div>
+    <div class="row">${txt('studentId', 'Student ID (fills MQTT IDs)')}</div>
+  </div>`;
+
+  h += sec('global', 'Program style', c.run !== 'loop', c.run === 'loop' ? 'everything in loop()' : c.run === 'tasks' ? 'FreeRTOS tasks' : 'tasks pinned to cores', `
+    <div class="row">${sel('run', 'Run blink / button-hold as', [['loop', 'loop() with millis()'], ['tasks', 'FreeRTOS tasks (xTaskCreate)'], ['pinned', 'Tasks pinned to core 0 / 1']], true)}</div>
+    <div class="row">${chk('showCore', 'Print running core (xPortGetCoreID)')}</div>
+    <div class="row">${sel('pwmApi', 'PWM syntax', [['v3', 'ESP32 core 3.x (ledcAttach)'], ['v2', 'ESP32 core 2.x (ledcSetup + channel)']], true)}</div>
+    <div class="row">${chk('explain', 'Explanation comments in code')}</div>`, 'global');
+
+  const holds = c.holds.map((x, i) => `<div class="item" data-block="hold-${i}"><div class="item-head"><b style="font-size:13px">Hold ${i + 1}</b>${codeBtn('hold-' + i)}</div><div class="row">${num(`holds.${i}.btn`, 'Button pin', PIN_ATTR)}${num(`holds.${i}.led`, 'LED pin', PIN_ATTR)}<button class="btn ghost small" data-act="del:holds:${i}" aria-label="Remove">Remove</button></div><div class="row">${chk(`holds.${i}.ledLow`, 'LED active LOW')}${chk(`holds.${i}.print`, 'Print button state')}</div></div>`).join('');
+  const toggles = c.toggles.map((x, i) => `<div class="item" data-block="toggle-${i}"><div class="item-head"><b style="font-size:13px">Toggle ${i + 1}</b>${codeBtn('toggle-' + i)}</div><div class="row">${num(`toggles.${i}.btn`, 'Button pin', PIN_ATTR)}${num(`toggles.${i}.led`, 'LED pin', PIN_ATTR)}${sel(`toggles.${i}.edge`, 'Trigger', [['FALLING', 'FALLING (press)'], ['RISING', 'RISING (release)'], ['CHANGE', 'CHANGE (both)']])}<button class="btn ghost small" data-act="del:toggles:${i}">Remove</button></div><div class="row">${chk(`toggles.${i}.debounce`, 'Debounce 200 ms')}${chk(`toggles.${i}.ledLow`, 'LED active LOW')}</div></div>`).join('');
+  const blinks = c.blinks.map((x, i) => `<div class="item" data-block="blink-${i}"><div class="item-head"><b style="font-size:13px">Blink ${i + 1}</b>${codeBtn('blink-' + i)}</div><div class="row">${num(`blinks.${i}.led`, 'LED pin', PIN_ATTR)}${x.potOn ? '' : num(`blinks.${i}.ms`, 'On/off time (ms)', 'min="10" step="100"')}<button class="btn ghost small" data-act="del:blinks:${i}">Remove</button></div>
+    <div class="row">${chk(`blinks.${i}.potOn`, 'Speed set by a pot')}${chk(`blinks.${i}.ledLow`, 'LED active LOW')}</div>
+    ${x.potOn ? `<div class="row">${num(`blinks.${i}.pot`, 'Pot pin', PIN_ATTR)}${num(`blinks.${i}.minMs`, 'Fastest (ms)', 'min="10" step="50"')}${num(`blinks.${i}.maxMs`, 'Slowest (ms)', 'min="10" step="50"')}</div><p class="hint">On/off time = <code>map(pot, 0, 4095, ${x.minMs ?? 200}, ${x.maxMs ?? 2000})</code>, read every pass.</p>` : ''}</div>`).join('');
+  h += sec('leds', 'Buttons & LEDs', c.holds.length + c.toggles.length + c.blinks.length > 0, `${c.holds.length + c.toggles.length + c.blinks.length} blocks`, `
+    <p class="hint"><b>Hold</b>: LED on while pressed (polling). <b>Toggle</b>: each press flips the LED (interrupt). <b>Blink</b>: on/off on a timer (millis or task).</p>
+    ${holds}${toggles}${blinks}
+    <div class="row"><button class="btn small" data-act="add:holds">+ Button hold → LED</button><button class="btn small" data-act="add:toggles">+ Button toggles LED</button><button class="btn small" data-act="add:blinks">+ Blinking LED</button></div>`);
+
+  h += sec('analog', 'Potentiometer, touch, sensors', c.pwm.on || c.potLed.on || c.touch.on || c.sensors.on, '', `
+    <div class="item" data-block="pwm"><div class="item-head">${chk('pwm.on', '<b>Pot sets LED brightness (PWM)</b>')}${c.pwm.on ? codeBtn('pwm') : ''}</div>${c.pwm.on ? `<div class="row">${num('pwm.pot', 'Pot pin', PIN_ATTR)}${num('pwm.led', 'LED pin', PIN_ATTR)}${num('pwm.freq', 'Freq (Hz)')}${num('pwm.res', 'Bits', 'min="1" max="16"')}</div>` : ''}</div>
+    <div class="item" data-block="potLed"><div class="item-head">${chk('potLed.on', '<b>Pot above threshold → LED on</b>')}${c.potLed.on ? codeBtn('potLed') : ''}</div>${c.potLed.on ? `<div class="row">${num('potLed.pot', 'Pot pin', PIN_ATTR)}${num('potLed.led', 'LED pin', PIN_ATTR)}${num('potLed.thr', 'Threshold (0–4095)')}</div><div class="row">${chk('potLed.ledLow', 'LED active LOW')}</div>` : ''}</div>
+    <div class="item" data-block="touch"><div class="item-head">${chk('touch.on', '<b>Touch wire action</b>')}${c.touch.on ? codeBtn('touch') : ''}</div>${c.touch.on ? `<div class="row">${num('touch.pin', 'Touch pin', PIN_ATTR)}${num('touch.thr', 'Touched below')}${sel('touch.action', 'Action', [['restart', 'Restart ESP32'], ['led', 'LED on while touched']])}${c.touch.action === 'led' ? num('touch.led', 'LED pin', PIN_ATTR) : ''}</div>` : ''}</div>
+    <div class="item" data-block="sensors"><div class="item-head">${chk('sensors.on', '<b>Print sensor values to Serial</b>')}${c.sensors.on ? codeBtn('sensors') : ''}</div>${c.sensors.on ? `<div class="row">${chk('sensors.pot', 'Pot')}${c.sensors.pot ? num('sensors.potPin', 'Pot pin', PIN_ATTR) : ''}${chk('sensors.touch', 'Touch')}${c.sensors.touch ? num('sensors.touchPin', 'Touch pin', PIN_ATTR) : ''}${chk('sensors.hall', 'Hall (core 2.x only)')}${c.blinks.some(b => b.potOn) ? chk('sensors.interval', 'Blink interval') : ''}</div><div class="row">${num('sensors.ms', 'Every (ms)', 'step="100"')}</div>` : ''}</div>`);
+
+  const s = c.sleep;
+  const wakeNames = [s.wTimer && 'timer', s.wExt0 && 'button (ext0)', s.wExt1 && 'pins (ext1)', s.wTouch && 'touch'].filter(Boolean);
+  const wakeRow = (key, label, fields) => `<div class="item wake-row"><div class="row">${chk('sleep.' + key, label)}</div>${s[key] ? `<div class="row">${fields}</div>` : ''}</div>`;
+  h += sec('sleep', 'Deep sleep', s.on, s.on ? `${s.trigger === 'button' ? 'button press' : s.delayS + ' s awake'} → wake by ${wakeNames.join(' or ') || 'reset only'}` : '', `
+    ${chk('sleep.on', '<b>Use deep sleep</b>')}
+    ${s.on ? `<div class="row">${sel('sleep.trigger', 'Go to sleep', [['button', 'When a button is pressed (interrupt)'], ['delay', 'After N seconds awake']], true)}${s.trigger === 'button' ? num('sleep.btn', 'Button pin', PIN_ATTR) : num('sleep.delayS', 'Seconds awake', 'min="1"')}</div>
+    <p class="hint" style="margin-top:4px"><b>Wake up by</b> (tick one or more; whichever happens first wakes the board)</p>
+    ${wakeRow('wTimer', 'Timer', num('sleep.timerS', 'After (s)', 'min="1"'))}
+    ${wakeRow('wExt0', 'Button (ext0, one pin)', num('sleep.ext0Pin', 'Pin', PIN_ATTR) + sel('sleep.ext0Level', 'Wake when', [['LOW', 'LOW (pull-up button)'], ['HIGH', 'HIGH (pull-down button)']]))}
+    ${wakeRow('wExt1', 'Several pins (ext1)', txt('sleep.ext1Pins', 'Pins, e.g. 2, 32 or A12, A4') + sel('sleep.ext1Mode', 'Mode', [['ANY_HIGH', 'ANY pin HIGH'], ['ALL_LOW', 'ALL pins LOW']]))}
+    ${wakeRow('wTouch', 'Touch pin', num('sleep.touchPin', 'Touch pin', PIN_ATTR) + num('sleep.touchThr', 'Threshold'))}
+    <div class="row">${chk('sleep.ledsOff', 'Turn LEDs off before sleeping')}</div>
+    <div class="row">${chk('sleep.bootCount', 'Boot counter (RTC_DATA_ATTR)')}${chk('sleep.reason', 'Print wake-up reason')}</div>
+    ${wakeNames.length > 1 ? '<p class="hint">Wake-up reason is printed automatically when there is more than one source.</p>' : ''}` : ''}`, s.on ? 'sleep' : '');
+
+  const netOn = c.wifi.on || c.ntp.on || c.web.on || c.ts.on || c.mqtt.on;
+  h += sec('wifi', 'WiFi', netOn, netOn ? (c.wifi.mode === 'AP' ? 'soft access point' : 'station') : 'turns on with any network block', `
+    <p class="hint">Turns on automatically for NTP, web server, ThingSpeak and MQTT. Tick below for “connect and print IP” only.</p>
+    <div class="row">${chk('wifi.on', 'Connect to WiFi and print IP')}</div>
+    <div class="row">${sel('wifi.mode', 'Mode', [['STA', 'Station: join hotspot'], ['AP', 'Soft AP: ESP32 makes a network']], true)}</div>
+    <div class="row">${txt('wifi.ssid', 'Network name (SSID)')}${txt('wifi.pass', 'Password')}</div>`, netOn ? 'wifi' : '');
+
+  h += sec('ntp', 'NTP date & time', c.ntp.on, '', `${chk('ntp.on', '<b>Get time from pool.ntp.org</b>')}
+    ${c.ntp.on ? `<div class="row">${num('ntp.gmt', 'GMT offset (h)')}${num('ntp.ms', 'Print every (ms)', 'step="100"')}</div><div class="row">${chk('ntp.disconnect', 'Turn WiFi off after sync')}</div>` : ''}`, c.ntp.on ? 'ntp' : '');
+
+  const outs = c.web.outputs.map((o, i) => `<div class="item" data-block="web-out-${i}"><div class="item-head"><b style="font-size:13px">Button ${i + 1}</b>${codeBtn('web-out-' + i)}</div><div class="row">${num(`web.outputs.${i}.pin`, `Output ${i + 1} pin`, PIN_ATTR)}${chk(`web.outputs.${i}.low`, 'Active LOW')}<button class="btn ghost small" data-act="del:web.outputs:${i}">Remove</button></div></div>`).join('');
+  h += sec('web', 'Web server', c.web.on, c.web.on ? `${c.web.outputs.length} buttons${c.web.pot ? ' · pot' : ''}` : '', `${chk('web.on', '<b>Host a web page on port 80</b>')}
+    ${c.web.on ? `<div class="row">${txt('web.title', 'Page heading')}</div>
+    ${outs}<div class="row"><button class="btn small" data-act="addOut">+ ON/OFF button for an output</button></div>
+    ${c.web.outputs.length ? `<div class="item" data-block="web-alloff"><div class="item-head">${chk('web.allOff', '<b>ALL OFF button</b> (link <code>/all/off</code>)')}${c.web.allOff ? codeBtn('web-alloff') : ''}</div></div>` : ''}
+    <div class="item" data-block="web-table"><div class="item-head"><b style="font-size:13px">Sensor table</b>${c.web.pot || c.web.volt || c.web.touch || c.web.btn || c.web.uptime ? codeBtn('web-table') : ''}</div>
+      <div class="row">${chk('web.pot', 'Pot value')}${chk('web.volt', 'Voltage (V, 2 dp)')}${c.web.pot || c.web.volt ? num('web.potPin', 'Pot pin', PIN_ATTR) : ''}</div>
+      <div class="row">${chk('web.touch', 'Touch value')}${c.web.touch ? num('web.touchPin', 'Touch pin', PIN_ATTR) : ''}</div>
+      <div class="row">${chk('web.btn', 'Button state')}${c.web.btn ? num('web.btnPin', 'Button pin', PIN_ATTR) : ''}${chk('web.uptime', 'Uptime (s)')}</div></div>
+    <div class="row">${num('web.refresh', 'Auto refresh (s, 0 = off)', 'min="0"')}</div>
+    ${+c.web.refresh > 0 ? '<p class="hint">Refresh reloads <code>/</code>, so it never repeats the last button click.</p>' : ''}` : ''}`, c.web.on ? 'web' : '');
+
+  const fOpts = [['none', '—'], ['pot', 'Pot value'], ['random', 'Random 0–99'], ['touch', 'Touch value'], ['hall', 'Hall (core 2.x)']];
+  h += sec('ts', 'ThingSpeak (web client)', c.ts.on, '', `${chk('ts.on', '<b>Send fields to ThingSpeak</b>')}
+    ${c.ts.on ? `<div class="row">${txt('ts.key', 'Write API key')}</div><div class="row">${sel('ts.f1', 'Field 1', fOpts)}${sel('ts.f2', 'Field 2', fOpts)}${sel('ts.f3', 'Field 3', fOpts)}</div><div class="row">${num('ts.potPin', 'Pot pin', PIN_ATTR)}${num('ts.ms', 'Every (ms)', 'step="1000"')}</div>` : ''}`, c.ts.on ? 'ts' : '');
+
+  const m = c.mqtt;
+  h += sec('mqtt', 'MQTT', m.on, m.on ? [m.pub && 'publish', m.sub && 'subscribe'].filter(Boolean).join(' + ') : '', `${chk('mqtt.on', '<b>Use an MQTT broker</b>')}
+    ${m.on ? `<div class="row">${txt('mqtt.server', 'Broker')}${num('mqtt.port', 'Port')}</div>
+    <div class="row">${txt('mqtt.clientId', 'Client ID (unique per board)')}</div>
+    <div class="row">${chk('mqtt.status', 'Publish a status message after connecting')}</div>
+    ${m.status ? `<div class="row">${txt('mqtt.statusTopic', 'Status topic')}${txt('mqtt.statusMsg', 'Message', false)}</div>` : ''}
+    <div class="item" data-block="mqtt-pub"><div class="item-head">${chk('mqtt.pub', '<b>Publish</b>')}${m.pub ? codeBtn('mqtt-pub') : ''}</div>${m.pub ? `<div class="row">${txt('mqtt.pubTopic', 'Topic')}</div><div class="row">${sel('mqtt.pubSrc', 'Value', [['pot', 'Pot reading'], ['touch', 'Touch reading'], ['button', 'Button (1 pressed / 0)'], ['random', 'Random 0–99']])}${m.pubSrc !== 'random' ? num('mqtt.pubPin', 'Pin', PIN_ATTR) : ''}${num('mqtt.pubMs', 'Every (ms)', 'step="100"')}</div>` : ''}</div>
+    <div class="item" data-block="mqtt-sub"><div class="item-head">${chk('mqtt.sub', '<b>Subscribe</b>')}${m.sub ? codeBtn('mqtt-sub') : ''}</div>${m.sub ? `<div class="row">${txt('mqtt.subTopic', m.routes.length ? 'Subscription (wildcards + and # allowed)' : 'Topic')}</div>
+      ${m.routes.length ? routesHtml(m) : `<div class="row">${sel('mqtt.subAction', 'On message', ACTIONS)}${num('mqtt.subLed', 'LED pin', PIN_ATTR)}${m.subAction === 'threshold' ? num('mqtt.subThr', 'Threshold') : ''}</div>${m.subAction !== 'pwm' ? `<div class="row">${chk('mqtt.subLedLow', 'LED active LOW')}</div>` : ''}`}
+      <div class="row"><button class="btn small" data-act="addRoute">+ Act per topic</button><span class="hint">${m.routes.length ? 'Each route handles one exact topic; other topics are ignored.' : 'Use when one wildcard subscription should do different things per topic.'}</span></div>` : ''}</div>
+    <div class="row"><button class="btn small" data-act="swapNodes">Swap Node1 / Node2</button><span class="hint">Swaps the pub/sub topics and Node1↔Node2 in the client ID.</span></div>` : ''}`, m.on ? 'mqtt' : '');
+
+  $('#controls').innerHTML = h;
+}
+
+function update() {
+  store.set('css452-builder', cfg); store.set('css452-preset', presetKey); store.set('css452-open', [...openSecs]);
+  let r;
+  try { r = generate(cfg); } catch (err) { $('#warns').innerHTML = `<div class="warn-item err"><span class="lv">ERROR</span><span>Generator error: ${esc(err.message)}</span></div>`; return; }
+  const lv = { err: 'ERROR', warn: 'CHECK', info: 'NOTE' };
+  const errs = r.warnings.filter(w => w.lvl === 'err').length;
+  $('#warns').innerHTML = (errs ? '' : `<div class="warn-item ok"><span class="lv">OK</span><span>No pin conflicts found.</span></div>`) + r.warnings.map(w => `<div class="warn-item ${w.lvl}"><span class="lv">${lv[w.lvl]}</span><span>${esc(w.msg)}</span></div>`).join('');
+  $('#b-wiring').innerHTML = wiringSVG(r.parts);
+  $('#b-pins').innerHTML = pinTable(r.parts);
+  const codeLines = r.code.replace(/\n$/, '').split('\n');
+  $('#b-code').innerHTML = '<code class="lines">' + codeLines.map((l, i) => `<span class="ln" data-i="${i}">${highlight(l)}</span>`).join('') + '</code>';
+  $('#b-codename').textContent = `${presetKey === 'blank' ? 'sketch' : presetKey}.ino · ${codeLines.length} lines`;
+  update.code = r.code; update.r = r;
+  const used = {};
+  r.parts.forEach(p => { (used[p.pin] ||= []).push(p.type === 'pot' ? 'Pot' : p.type === 'touch' ? 'Touch' : p.label); });
+  $('#b-board').innerHTML = boardSVG(used);
+  $('#b-legend').innerHTML = boardLegend(true);
+  refreshPinHints();
+  renderWebPreview();
+  applySelection({});
+}
+
+/* ---------- pin hints under pin inputs ---------- */
+function refreshPinHints() {
+  document.querySelectorAll('#controls .pin-in').forEach(inp => {
+    const hint = inp.nextElementSibling; if (!hint) return;
+    const r = resolvePin(inp.value);
+    if (r.err) { hint.textContent = '✗ not a pin'; hint.className = 'pin-hint bad'; inp.title = r.err; return; }
+    const g = r.gpio, bits = [];
+    if (r.alias) bits.push('= GPIO' + g); else if (GPIO_ANALOG[g]) bits.push('= ' + GPIO_ANALOG[g]);
+    if (ADC_CH[g]) bits.push(ADC_CH[g][0] === '1' ? 'ADC1' : 'ADC2');
+    if (PINS.INPUT_ONLY.includes(g)) bits.push('in only');
+    const bad = PINS.FLASH.includes(g) || (!PINS.VALID.includes(g));
+    hint.textContent = bad ? '✗ ' + (PINS.FLASH.includes(g) ? 'flash pin' : 'no such pin') : bits.join(' · ');
+    hint.className = 'pin-hint' + (bad ? ' bad' : '');
+    inp.title = pinInfo(g);
+  });
+}
+
+/* ---------- block <-> code highlighting ---------- */
+let selBlock = null;
+const SEC_OF = id => /^(hold|toggle|blink)-/.test(id) ? 'leds' : /^(pwm|potLed|touch|sensors)$/.test(id) ? 'analog' : /^web/.test(id) ? 'web' : /^mqtt/.test(id) ? 'mqtt' : id;
+function blockName(id) {
+  const m = /^(\w+)-(\d+)$/.exec(id) || /^web-out-(\d+)$/.exec(id);
+  if (/^web-out-/.test(id)) return 'Web button ' + (+id.split('-')[2] + 1);
+  if (/^mqtt-route-/.test(id)) return 'MQTT route ' + (+id.split('-')[2] + 1);
+  if (m) return { hold: 'Hold', toggle: 'Toggle', blink: 'Blink' }[m[1]] + ' ' + (+m[2] + 1);
+  return { global: 'Setup & program style', pwm: 'Pot → LED brightness', potLed: 'Pot threshold → LED', touch: 'Touch action', sensors: 'Print sensors', sleep: 'Deep sleep', wifi: 'WiFi', ntp: 'NTP time', web: 'Web server', 'web-table': 'Web sensor table', 'web-alloff': 'ALL OFF button', ts: 'ThingSpeak', mqtt: 'MQTT connection', 'mqtt-pub': 'MQTT publish', 'mqtt-sub': 'MQTT subscribe' }[id] || id;
+}
+function selectBlock(id, opts = {}) { selBlock = id; applySelection(opts); }
+function applySelection({ scrollCode, scrollControls }) {
+  const r = update.r; if (!r) return;
+  const pre = $('#b-code');
+  let first = null, count = 0;
+  pre.querySelectorAll('.ln').forEach(el => {
+    const on = !!selBlock && (r.lineTags[+el.dataset.i] || []).includes(selBlock);
+    el.classList.toggle('hl', on);
+    if (on) { count++; if (!first) first = el; }
+  });
+  if (selBlock && !count) selBlock = null;
+  pre.classList.toggle('has-sel', !!selBlock);
+  document.querySelectorAll('#b-wiring .wrow').forEach(g => g.classList.toggle('hl', !!selBlock && g.dataset.b.split(' ').includes(selBlock)));
+  document.querySelectorAll('#controls [data-block]').forEach(el => el.classList.toggle('sel', el.dataset.block === selBlock));
+  document.querySelectorAll('#controls [data-show]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.show === selBlock)));
+  const bar = $('#sel-bar');
+  bar.hidden = !selBlock;
+  if (selBlock) bar.innerHTML = `<span>Highlighting <b>${esc(blockName(selBlock))}</b> · ${count} line${count === 1 ? '' : 's'}</span><button class="btn small" id="sel-clear">Clear</button>`;
+  const smooth = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  if (scrollCode && first) first.scrollIntoView({ block: 'center', behavior: smooth });
+  if (scrollControls && selBlock) {
+    const secId = SEC_OF(selBlock);
+    const d = document.querySelector(`#controls details.sec[data-sec="${secId}"]`);
+    if (d && !d.open) { d.open = true; openSecs.add(secId); }
+    const target = document.querySelector(`#controls [data-block="${selBlock}"]`) || d;
+    target?.scrollIntoView({ block: 'center', behavior: smooth });
+  }
+}
+$('#sel-bar').addEventListener('click', e => { if (e.target.id === 'sel-clear') selectBlock(null); });
+$('#b-code').addEventListener('click', e => {
+  const ln = e.target.closest('.ln'); if (!ln) return;
+  if (String(getSelection && getSelection()).length) return;
+  const tags = update.r.lineTags[+ln.dataset.i] || [];
+  if (!tags.length) { selectBlock(null); return; }
+  const pick = tags.find(t => /-/.test(t)) || tags[0];
+  selectBlock(pick === selBlock ? null : pick, { scrollControls: true });
+});
+document.querySelector('.out-nav').addEventListener('click', e => {
+  const a = e.target.closest('a[data-go]'); if (!a) return;
+  e.preventDefault(); document.getElementById(a.dataset.go)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+});
+
+/* ---------- web page preview ---------- */
+const pvState = {}; let pvPot = 2048, pvBtn = false, pvPath = '/';
+function renderWebPage() { renderWebPreview(true); }
+function renderWebPreview(simOnly) {
+  const r = update.r, c = r.config, card = $('#b-webcard');
+  card.hidden = !c.web.on; $('#nav-web').hidden = !c.web.on;
+  if (!c.web.on) return;
+  const ip = c.wifi.mode === 'AP' ? '192.168.4.1' : '192.168.1.42';
+  const outs = c.web.outputs;
+  const ord = r.webOrder, rows = r.rowOrder;
+  const mv = (k, i, n) => `<div class="pv-move"><button type="button" data-mv="${k}:-1" aria-label="Move up"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" data-mv="${k}:1" aria-label="Move down"${i === n - 1 ? ' disabled' : ''}>▼</button></div>`;
+  const rmv = (k, i, n) => n < 2 ? '' : `<td class="rm"><div class="pv-rmove"><button type="button" data-mvrow="${k}:-1" aria-label="Row up"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" data-mvrow="${k}:1" aria-label="Row down"${i === n - 1 ? ' disabled' : ''}>▼</button></div></td>`;
+  const rowHtml = { pot: ['Potentiometer', pvPot], volt: ['Voltage (V)', (pvPot * 3.3 / 4095).toFixed(2)], touch: [`Touch (GPIO${c.web.touchPin})`, 64], button: ['Switch', pvBtn ? 'Pressed' : 'Released'], uptime: ['Uptime (s)', Math.floor(performance.now() / 1000)] };
+  let body = '';
+  ord.forEach((k, i) => {
+    let inner;
+    if (k === 'alloff') inner = `<p><button type="button" class="pv-btn alloff" data-pvall="1">ALL OFF</button></p>`;
+    else if (k === 'table') inner = `<table><tr><th>Sensor</th><th>Value</th></tr>${rows.map((rk, j) => `<tr><td>${esc(rowHtml[rk][0])}</td><td>${esc(rowHtml[rk][1])}</td>${rmv(rk, j, rows.length)}</tr>`).join('')}</table>`;
+    else {
+      const o = outs.find(x => 'out-' + x.pin === k); const st = pvState[o.pin] ? 'on' : 'off';
+      inner = `<p>GPIO ${o.pin} - State ${st}</p><p><button type="button" class="pv-btn${st === 'on' ? ' off' : ''}" data-pv="${o.pin}">${st === 'on' ? 'OFF' : 'ON'}</button></p>`;
+    }
+    body += `<div class="pv-item">${inner}${mv(k, i, ord.length)}</div>`;
+  });
+  renderWebPage.html = `<div class="pv"><div class="pv-url"><span>🔒︎</span><b>http://${ip}${esc(pvPath)}</b></div><div class="pv-page"><h1>${esc(c.web.title)}</h1>${body || '<p style="color:#777777">Empty page: add a sensor or an output button.</p>'}</div></div>`;
+  $('#b-web').innerHTML = renderWebPage.html;
+  if (simOnly) return;
+  $('#b-websim').innerHTML = (rows.includes('pot') || rows.includes('volt') ? `<label class="pv-sim">Turn the pot <input type="range" id="pv-pot" min="0" max="4095" value="${pvPot}"> <span>${pvPot}</span></label>` : '')
+    + (rows.includes('button') ? `<label class="pv-sim"><input type="checkbox" id="pv-btn"${pvBtn ? ' checked' : ''} style="flex:none;max-width:none"> Hold the button</label>` : '');
+}
+$('#b-websim').addEventListener('input', e => {
+  if (e.target.id === 'pv-pot') { pvPot = +e.target.value; e.target.nextElementSibling.textContent = pvPot; renderWebPage(); }
+  if (e.target.id === 'pv-btn') { pvBtn = e.target.checked; renderWebPage(); }
+});
+$('#b-web').addEventListener('click', e => {
+  const r = update.r;
+  const m = e.target.closest('[data-mv]'), mr = e.target.closest('[data-mvrow]'), pv = e.target.closest('[data-pv]');
+  if (m || mr) {
+    const [k, d] = (m || mr).dataset[m ? 'mv' : 'mvrow'].split(':');
+    const list = [...(m ? r.webOrder : r.rowOrder)];
+    const i = list.indexOf(k), j = i + +d;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    if (m) cfg.web.order = list; else cfg.web.rowOrder = list;
+    update();
+    selectBlock(m && k === 'alloff' ? 'web-alloff' : m && k !== 'table' ? 'web-out-' + cfg.web.outputs.findIndex(o => 'out-' + o.pin === k) : 'web-table', { scrollCode: false });
+    return;
+  }
+  if (e.target.closest('[data-pvall]')) {
+    cfg.web.outputs.forEach(o => { pvState[o.pin] = false; });
+    pvPath = '/all/off';
+    renderWebPage();
+    $('#pv-req').innerHTML = `Browser sent <b>GET /all/off HTTP/1.1</b> → code finds it with <b>header.indexOf("GET /all/off")</b> → every output goes off`;
+    selectBlock('web-alloff', {});
+    return;
+  }
+  if (pv) {
+    const pin = +pv.dataset.pv, idx = cfg.web.outputs.findIndex(o => +o.pin === pin), o = cfg.web.outputs[idx];
+    pvState[pin] = !pvState[pin];
+    const st = pvState[pin] ? 'on' : 'off';
+    pvPath = `/${pin}/${st}`;
+    renderWebPage();
+    const lvl = (st === 'on') !== !!o.low ? 'HIGH' : 'LOW';
+    $('#pv-req').innerHTML = `Browser sent <b>GET /${pin}/${st} HTTP/1.1</b> → code finds it with <b>header.indexOf("GET /${pin}/${st}")</b> → <b>digitalWrite(output${pin}, ${lvl})</b>`;
+    selectBlock('web-out-' + idx, {});
+  }
+});
+
+const controls = $('#controls');
+controls.addEventListener('input', e => {
+  const el = e.target; const p = el.dataset.p; if (!p) return;
+  if (el.type === 'checkbox') return;
+  setP(cfg, p, el.type === 'number' ? (el.value === '' ? '' : +el.value) : el.value);
+  if (el.tagName !== 'SELECT') update();
+});
+controls.addEventListener('change', e => {
+  const el = e.target;
+  if (el.id === 'b-preset') { loadPreset(el.value); return; }
+  const p = el.dataset.p; if (!p) return;
+  if (el.type === 'checkbox') setP(cfg, p, el.checked);
+  if (/^blinks\.\d+\.potOn$/.test(p) && el.checked) { const b = getP(cfg, p.replace(/\.potOn$/, '')); b.pot ??= 'A4'; b.minMs ??= 200; b.maxMs ??= 2000; }
+  else if (el.tagName === 'SELECT') setP(cfg, p, el.value);
+  if (el.dataset.re) { const y = controls.scrollTop, wy = window.scrollY; renderControls(); controls.scrollTop = y; window.scrollTo(0, wy); document.getElementById(el.id)?.focus({ preventScroll: true }); }
+  update();
+});
+controls.addEventListener('toggle', e => {
+  const d = e.target.closest('details.sec'); if (!d) return;
+  d.open ? openSecs.add(d.dataset.sec) : openSecs.delete(d.dataset.sec);
+  store.set('css452-open', [...openSecs]);
+}, true);
+controls.addEventListener('click', e => {
+  const sb = e.target.closest('[data-show]');
+  if (sb) { e.preventDefault(); e.stopPropagation(); selectBlock(sb.dataset.show === selBlock ? null : sb.dataset.show, { scrollCode: true }); return; }
+  if (e.target.id === 'b-reload') { loadPreset($('#b-preset').value); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const [act, path, idx] = b.dataset.act.split(':');
+  const nextPin = used => [16, 17, 26, 27, 25, 32, 33, 18, 19, 21, 22, 23, 4, 5, 13, 14].find(p => !used.includes(p)) ?? 16;
+  const usedPins = () => { const r = generate(cfg); return r.parts.map(p => p.pin); };
+  if (act === 'add') {
+    const used = usedPins();
+    if (path === 'holds') cfg.holds.push({ btn: cfg.holds.length || cfg.toggles.length ? 26 : 34, led: nextPin(used), ledLow: false, print: false });
+    if (path === 'toggles') cfg.toggles.push({ btn: cfg.holds.length || cfg.toggles.length ? 26 : 34, led: nextPin(used), edge: 'FALLING', debounce: false, ledLow: false });
+    if (path === 'blinks') cfg.blinks.push({ led: nextPin(used), ms: 1000, ledLow: false, potOn: false, pot: 'A4', minMs: 200, maxMs: 2000 });
+  } else if (act === 'del') {
+    getP(cfg, path).splice(+idx, 1);
+  } else if (act === 'addOut') {
+    cfg.web.outputs.push({ pin: nextPin(usedPins()), low: false });
+  } else if (act === 'addRoute') {
+    const m = cfg.mqtt;
+    const base = /\/[#+]$/.test(m.subTopic) ? m.subTopic.replace(/\/[#+]$/, '') : m.subTopic.split('/').slice(0, -1).join('/') || m.subTopic;
+    if (!m.routes.length) {
+      // first route keeps what the single subscription did, and the subscription becomes a wildcard
+      if (!/[+#]/.test(m.subTopic)) m.routes.push({ topic: m.subTopic, action: m.subAction, led: m.subLed, thr: m.subThr, ledLow: m.subLedLow });
+      m.subTopic = base + '/#';
+    }
+    const used = usedPins();
+    const names = ['led1', 'led2', 'cmd', 'value'];
+    const name = names.find(n => !m.routes.some(r => r.topic === base + '/' + n)) || 'topic' + (m.routes.length + 1);
+    m.routes.push({ topic: base + '/' + name, action: 'onoff', led: nextPin(used), thr: 2000, ledLow: false });
+  } else if (act === 'swapNodes') {
+    const m = cfg.mqtt; [m.pubTopic, m.subTopic] = [m.subTopic, m.pubTopic];
+    m.clientId = m.clientId.replace(/Node1|Node2/g, x => (x === 'Node1' ? 'Node2' : 'Node1'));
+  }
+  const y = controls.scrollTop, wy = window.scrollY; renderControls(); controls.scrollTop = y; window.scrollTo(0, wy); update();
+});
+$('#b-copy').addEventListener('click', e => copyText(update.code || '', e.currentTarget));
+// Downloads work in a normal browser tab (local file or website), not inside an embedded preview frame
+if (location.protocol === 'file:' || window.self === window.top) {
+  const dl = $('#b-dl'); dl.hidden = false;
+  dl.addEventListener('click', () => {
+    const name = (presetKey === 'blank' ? 'sketch' : presetKey);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([update.code || ''], { type: 'text/plain' }));
+    a.download = name + '.ino'; document.body.appendChild(a); a.click(); a.remove();
+  });
+}
+
+/* ===================== reference ===================== */
+function renderRef() {
+  const code = s => `<div class="codebox"><pre>${highlight(s.trim())}</pre></div>`;
+  const pinNotes = { 0: 'Strapping pin (BOOT button). Avoid.', 1: 'TX: USB serial. Do not use.', 2: 'Strapping pin. Onboard LED on many DevKits.', 3: 'RX: USB serial. Do not use.', 4: '', 5: 'Strapping pin.', 12: 'Strapping pin: must be LOW at boot.', 13: '', 14: '', 15: 'Strapping pin.', 16: 'Onboard LED on the ESPino32 (Lecture 3).', 17: '', 18: '', 19: '', 21: 'I2C SDA by default.', 22: 'I2C SCL by default.', 23: '', 25: 'DAC1.', 26: 'DAC2.', 27: '', 32: '', 33: '', 34: 'Input only, no pull-up.', 35: 'Input only, no pull-up.', 36: 'A0 / VP. Input only, no pull-up.', 37: 'Input only.', 38: 'Input only.', 39: 'VN. Input only, no pull-up.' };
+  const yes = b => (b ? '<span class="yes">yes</span>' : '<span class="no">–</span>');
+  const pinRows = PINS.VALID.filter(p => p !== 37 && p !== 38).map(p => {
+    const out = !PINS.INPUT_ONLY.includes(p) && !PINS.UART.includes(p);
+    const adc = ADC_CH[p] ? `${GPIO_ANALOG[p]} · ADC${ADC_CH[p][0]} ch${ADC_CH[p].slice(2)}${ADC_CH[p][0] === '2' ? ' (no WiFi)' : ''}` : '';
+    const data = [out && !PINS.STRAP.includes(p) ? 'out' : '', PINS.ADC1.includes(p) ? 'adc' : '', PINS.TOUCH.includes(p) ? 'touch' : '', PINS.RTC.includes(p) ? 'rtc' : '', !PINS.UART.includes(p) ? 'irq' : ''].join(' ');
+    return `<tr data-f="${data}"><td>GPIO${p}</td><td>${yes(out)}</td><td>${adc || '<span class="no">–</span>'}</td><td>${PINS.TOUCH.includes(p) ? TOUCH_T[p] : '<span class="no">–</span>'}</td><td>${yes(PINS.RTC.includes(p))}</td><td>${pinNotes[p] || ''}</td></tr>`;
+  }).join('');
+  const checks = [
+    ['Before', ['Arduino IDE opens and the ESP32 board package is installed (Tools → Board → esp32).', 'Library Manager: “PubSubClient” by Nick O\'Leary installed.', 'This kit saved on the laptop and opens with WiFi off.', 'Phone hotspot on 2.4 GHz. iPhone: Settings → Personal Hotspot → Maximize Compatibility on.', 'Hotspot name typed exactly. iPhone names use a curly apostrophe (’), not \'. Safer: rename the phone to a plain name.', 'Equipment box: ESP32, data USB cable (not charge-only), breadboard, 2 push buttons, 3+ LEDs, 3× 330 Ω, 2× 10 kΩ, potentiometer, jumper wires.', 'Phone charged for recording videos.']],
+    ['In the room', ['Read all 3 questions first; start with the one you are surest about.', 'Upload a tiny test sketch first to confirm board and port.', 'If upload hangs on “Connecting…”, hold the BOOT/PROGRAM button until it starts writing.', 'Open the Serial Monitor at 115200.', 'Wire with the USB unplugged; check LED direction (long leg = +).']],
+    ['Submit', ['Record each video: circuit, code on screen, then the demo.', 'Name files as the question says (e.g. Q1, Q2).', 'Upload .ino files and videos to Google Classroom.', 'Hand the paper to the instructor.']],
+  ];
+  const done = store.get('css452-checks', {});
+  const checkHtml = checks.map(([t, items], gi) => `<div class="card"><h3>${t}</h3><ul class="check">${items.map((it, i) => `<li><label><input type="checkbox" id="ck-${gi}-${i}" data-ck="${gi}-${i}"${done[gi + '-' + i] ? ' checked' : ''}><span>${esc(it)}</span></label></li>`).join('')}</ul></div>`).join('');
+
+  $('#ref').innerHTML = `
+  <section><h2>Exam-day checklist</h2><div class="ref-grid">${checkHtml}</div></section>
+
+  <section><h2>Wiring rules</h2><div class="ref-grid">
+    <div class="card"><h3>LED</h3>${wiringSVG([{ type: 'led', pin: 17, label: 'LED' }])}<p class="hint">Long leg (anode, +) to the GPIO. Short leg (flat edge) through 330 Ω to GND. Reversed LED = never lights.</p></div>
+    <div class="card"><h3>Push button with pull-up</h3>${wiringSVG([{ type: 'btn', pin: 34, label: 'SW' }])}<p class="hint">Course standard. The four legs of a tactile switch are joined in pairs: use legs on opposite corners.</p></div>
+    <div class="card"><h3>Potentiometer</h3>${wiringSVG([{ type: 'pot', pin: 36, label: 'Pot' }])}<p class="hint">Swap the outer legs if turning clockwise lowers the value.</p></div>
+    <div class="card"><h3>Button with pull-down (ext1 ANY_HIGH)</h3>${wiringSVG([{ type: 'btnDown', pin: 32, label: 'SW' }])}</div>
+  </div></section>
+
+  <section><h2>ESPino32 board</h2>
+    <p class="hint" style="margin:0">The ThaiEasyElec ESPino32 used in class. Hover a pin for details. Analog names work directly in code: <code>analogRead(A5)</code> is the same as <code>analogRead(33)</code>.</p>
+    <div class="card"><div class="table-wrap">${boardSVG({})}</div><div class="board-legend">${boardLegend(false)}</div></div>
+    <div class="card table-wrap" style="padding:6px 10px"><table class="pins"><thead><tr><th>Analog name</th><th>GPIO</th><th>ADC</th><th>Analog name</th><th>GPIO</th><th>ADC</th></tr></thead><tbody>${
+      (() => { const a = Object.entries(GPIO_ANALOG).map(([g, n]) => [n, +g]).sort((x, y) => +x[0].slice(1) - +y[0].slice(1)); const half = Math.ceil(a.length / 2); return a.slice(0, half).map((r, i) => { const r2 = a[half + i]; const cell = q => q ? `<td>${q[0]}</td><td>GPIO${q[1]}</td><td>ADC${ADC_CH[q[1]].replace('.', ' ch')}${ADC_CH[q[1]][0] === '2' ? ' (no WiFi)' : ''}</td>` : '<td></td><td></td><td></td>'; return `<tr>${cell(r)}${cell(r2)}</tr>`; }).join(''); })()
+    }</tbody></table><p class="hint">A1, A2, A8 and A9 do not exist on the ESP32.</p></div>
+  </section>
+
+  <section><h2>Pin finder</h2>
+    <div class="filters" id="pinfilters">
+      <button class="btn small" data-f="out" aria-pressed="false">Safe LED / output</button>
+      <button class="btn small" data-f="adc" aria-pressed="false">Analog with WiFi on</button>
+      <button class="btn small" data-f="touch" aria-pressed="false">Touch</button>
+      <button class="btn small" data-f="rtc" aria-pressed="false">Deep-sleep wake (ext0/ext1)</button>
+    </div>
+    <div class="table-wrap card" style="padding:6px 10px"><table class="pins" id="pintable"><thead><tr><th>GPIO</th><th>Output</th><th>Analog</th><th>Touch</th><th>RTC wake</th><th>Notes</th></tr></thead><tbody>${pinRows}</tbody></table></div>
+    <p class="hint">GPIO6–11 are wired to the flash chip and are not on the header. Any pin except 6–11 works as an interrupt.</p>
+  </section>
+
+  <section><h2>API quick reference</h2><div class="ref-grid">
+    <div class="card"><h3>Digital I/O</h3>${code(`
+pinMode(17, OUTPUT);          // or INPUT, INPUT_PULLUP
+digitalWrite(17, HIGH);       // 3.3 V; LOW = 0 V
+int s = digitalRead(34);      // HIGH or LOW
+Serial.begin(115200);  Serial.println(s);`)}</div>
+    <div class="card"><h3>Analog in &amp; PWM out</h3>${code(`
+int v = analogRead(A0);              // 0..4095 (12-bit)
+int d = map(v, 0, 4095, 0, 255);     // rescale
+// core 3.x
+ledcAttach(17, 5000, 8);             // pin, freq, bits
+ledcWrite(17, d);                    // pin, duty 0..255
+// core 2.x (lecture slides)
+ledcSetup(0, 5000, 8);               // channel, freq, bits
+ledcAttachPin(17, 0);                // pin, channel
+ledcWrite(0, d);                     // channel, duty`)}</div>
+    <div class="card"><h3>Touch, hall, reset</h3>${code(`
+int t = touchRead(32);   // high untouched, low touched
+int h = hallRead();      // core 2.x only
+ESP.restart();           // software reset`)}</div>
+    <div class="card"><h3>Timing &amp; interrupts</h3>${code(`
+unsigned long now = millis();               // ms since boot
+if (now - prev >= interval) { prev = now; /* job */ }
+
+void IRAM_ATTR isr() { flag = true; }      // keep short
+attachInterrupt(digitalPinToInterrupt(34), isr, FALLING);
+// modes: LOW, HIGH, CHANGE, FALLING, RISING`)}</div>
+    <div class="card"><h3>FreeRTOS tasks</h3>${code(`
+void Task1(void * parameter) {
+  for (;;) { /* job */ delay(10); }
+  vTaskDelete(NULL);
+}
+xTaskCreate(Task1, "Task1", 2048, NULL, 1, NULL);
+xTaskCreatePinnedToCore(Task1, "Task1", 2048, NULL, 1, NULL, 0); // core 0
+Serial.println(xPortGetCoreID());`)}</div>
+    <div class="card"><h3>Deep sleep</h3>${code(`
+RTC_DATA_ATTR int bootCount = 0;            // survives sleep
+esp_sleep_enable_timer_wakeup(5 * 1000000ULL);           // µs
+esp_sleep_enable_ext0_wakeup(GPIO_NUM_32, LOW);          // one pin
+esp_sleep_enable_ext1_wakeup(0x100000004, ESP_EXT1_WAKEUP_ANY_HIGH); // 2^2+2^32
+touchAttachInterrupt(32, callback, 40);
+esp_sleep_enable_touchpad_wakeup();
+esp_deep_sleep_start();                     // wake = setup() again`)}</div>
+    <div class="card"><h3>WiFi</h3>${code(`
+#include <WiFi.h>
+WiFi.mode(WIFI_STA);
+WiFi.begin(ssid, password);
+while (WiFi.status() != WL_CONNECTED) { delay(500); }
+Serial.println(WiFi.localIP());
+WiFi.softAP("ESP32_AP", "12345678");        // own network, IP 192.168.4.1`)}<p class="hint">Status codes: 0 idle, 1 SSID not found, 3 connected, 4 wrong password, 6 disconnected.</p></div>
+    <div class="card"><h3>NTP time</h3>${code(`
+#include "time.h"
+configTime(7 * 3600, 0, "pool.ntp.org");
+struct tm t;
+if (getLocalTime(&t)) Serial.println(&t, "%A, %B %d %Y %H:%M:%S");`)}</div>
+    <div class="card"><h3>HTTP: server and client</h3>${code(`
+WiFiServer server(80);  server.begin();
+WiFiClient client = server.available();
+header.indexOf("GET /26/on") >= 0      // which link was clicked
+
+#include <HTTPClient.h>
+HTTPClient http;
+http.begin(client, url);  int code = http.GET();  http.end();`)}<p class="hint">Browser request: <code>GET /26/on HTTP/1.1</code>, headers, blank line. Reply: <code>HTTP/1.1 200 OK</code>, <code>Content-type:text/html</code>, <code>Connection: close</code>, blank line, HTML, blank line.</p></div>
+    <div class="card"><h3>MQTT (PubSubClient)</h3>${code(`
+#include <PubSubClient.h>
+WiFiClient ClientNode;  PubSubClient ClientESP(ClientNode);
+ClientESP.setServer("broker.hivemq.com", 1883);
+ClientESP.setCallback(callback);
+ClientESP.connect(ClientID, NULL, NULL);
+ClientESP.subscribe(Topic);
+ClientESP.publish(Topic, Val);      // Val is text (char[])
+ClientESP.loop();                   // call every loop()
+void callback(char* topic, byte* payload, unsigned int length) { }`)}</div>
+  </div></section>
+
+  <section><h2>MQTT concepts</h2><div class="ref-grid">
+    <div class="card"><h3>Roles</h3><p style="margin:0">A <b>publisher</b> sends a message with a <b>topic</b> to the <b>broker</b>. The broker forwards it to every <b>subscriber</b> of that topic. Publisher and subscriber never talk directly.</p>
+      <p class="hint">Public brokers on port 1883: broker.hivemq.com, test.mosquitto.org, broker.emqx.io.</p></div>
+    <div class="card"><h3>Topic wildcard tester</h3>
+      <div class="row"><label class="f grow">Subscription filter<input type="text" id="wc-filter" value="Code/+/2/Z" spellcheck="false"></label></div>
+      <label class="f">Published topics (one per line)<textarea id="wc-topics" rows="5" style="width:100%;font:13px var(--f-mono);padding:6px;border:1px solid var(--line-strong);border-radius:5px;background:var(--surface)">Code/A/1/X
+Code/A/2/Y
+Code/A/2/Z
+Code/B/1/X
+Code/B/2/Z</textarea></label>
+      <div class="match" id="wc-out"></div>
+      <p class="hint"><code>+</code> matches exactly one level. <code>#</code> matches the rest (any number of levels) and must be last.</p></div>
+    <div class="card"><h3>QoS</h3><div class="table-wrap"><table class="pins"><thead><tr><th>Level</th><th>Name</th><th>Delivered</th></tr></thead><tbody>
+      <tr><td>QoS 0</td><td>Fire and forget</td><td>At most once, no acknowledgement</td></tr>
+      <tr><td>QoS 1</td><td>Acknowledged</td><td>At least once, duplicates possible</td></tr>
+      <tr><td>QoS 2</td><td>Assured</td><td>Exactly once (4-step handshake)</td></tr></tbody></table></div>
+      <p class="hint">The message travels at the lower of the publisher's and subscriber's QoS. PubSubClient publishes at QoS 0.</p></div>
+    <div class="card"><h3>ClientESP.state() codes</h3><div class="table-wrap"><table class="pins"><tbody>
+      <tr><td>-4</td><td>Connection timeout</td></tr><tr><td>-3</td><td>Connection lost</td></tr><tr><td>-2</td><td>Connect failed: no internet or wrong broker</td></tr><tr><td>-1</td><td>Disconnected</td></tr><tr><td>0</td><td>Connected</td></tr><tr><td>2</td><td>Client ID rejected</td></tr><tr><td>4 / 5</td><td>Bad credentials / not authorised</td></tr></tbody></table></div></div>
+  </div></section>
+
+  <section><h2>When something goes wrong</h2><div class="card table-wrap"><table class="pins"><thead><tr><th>Symptom</th><th>Fix</th></tr></thead><tbody>
+    <tr><td>No port in Tools → Port</td><td>Use a data USB cable; install the CP210x driver (Lecture 3).</td></tr>
+    <tr><td>Upload stuck on “Connecting…”</td><td>Hold the BOOT/PROGRAM button until “Writing at …” appears.</td></tr>
+    <tr><td>Serial Monitor shows garbage</td><td>Set the baud rate to 115200.</td></tr>
+    <tr><td>LED never lights</td><td>LED reversed (long leg to GPIO) or missing GND wire. Test with <code>digitalWrite(pin, HIGH)</code> in setup().</td></tr>
+    <tr><td>Button reads random values</td><td>Missing 10 kΩ pull-up on GPIO34–39, or switch legs on the same side.</td></tr>
+    <tr><td>Pot always reads 0 or 4095</td><td>Wiper on the wrong leg, or pot on an ADC2 pin while WiFi is on.</td></tr>
+    <tr><td>WiFi dots forever</td><td>Hotspot is 5 GHz, wrong name/password, or curly apostrophe in the SSID.</td></tr>
+    <tr><td>MQTT failed, rc=-2</td><td>No internet on the hotspot, or wrong broker name/port.</td></tr>
+    <tr><td>MQTT keeps reconnecting</td><td>Two boards share the same client ID. Make them different.</td></tr>
+    <tr><td>Subscriber gets nothing</td><td>Topics differ by one character, or <code>ClientESP.loop()</code> is missing.</td></tr>
+    <tr><td>Interrupt toggles twice</td><td>Switch bounce: add the 200 ms debounce.</td></tr>
+    <tr><td>‘hallRead’ was not declared</td><td>Removed in ESP32 core 3.x. Skip it, or install core 2.0.17.</td></tr>
+    <tr><td>‘ledcSetup’ was not declared</td><td>You are on core 3.x: use <code>ledcAttach(pin, freq, bits)</code> and <code>ledcWrite(pin, duty)</code>.</td></tr>
+    <tr><td>Guru Meditation / watchdog reset in tasks</td><td>Add <code>delay(10)</code> inside each task loop; raise stack size to 2048+.</td></tr>
+  </tbody></table></div></section>
+
+  <p class="foot">Code here follows the course sketches in <code>CSS452-Internet-of-Things/</code>. Every preset was syntax-checked against stub ESP32 headers, not compiled with the real ESP32 core, so test on the board before the exam. Your progress on the checklist and builder settings are saved in this browser only.</p>`;
+
+  const runWc = () => {
+    const f = $('#wc-filter').value.trim();
+    const match = (filter, topic) => {
+      const fp = filter.split('/'), tp = topic.split('/');
+      for (let i = 0; i < fp.length; i++) {
+        if (fp[i] === '#') return i === fp.length - 1;
+        if (i >= tp.length) return false;
+        if (fp[i] !== '+' && fp[i] !== tp[i]) return false;
+      }
+      return fp.length === tp.length;
+    };
+    $('#wc-out').innerHTML = $('#wc-topics').value.split('\n').map(t => t.trim()).filter(Boolean)
+      .map(t => match(f, t) ? `<span class="y">✓ receives  ${esc(t)}</span>` : `<span class="n">✗ ignores   ${esc(t)}</span>`).join('');
+  };
+  $('#wc-filter').addEventListener('input', runWc); $('#wc-topics').addEventListener('input', runWc); runWc();
+  $('#pinfilters').addEventListener('click', e => {
+    const b = e.target.closest('button[data-f]'); if (!b) return;
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    $('#pinfilters').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', String(on));
+    $('#pintable').querySelectorAll('tbody tr').forEach(tr => tr.classList.toggle('dim', on && !tr.dataset.f.split(' ').includes(b.dataset.f)));
+  });
+  $('#ref').addEventListener('change', e => {
+    const k = e.target.dataset.ck; if (!k) return;
+    const d = store.get('css452-checks', {}); d[k] = e.target.checked; store.set('css452-checks', d);
+  });
+}
+
+/* ===================== boot ===================== */
+renderToc(); renderEntries(); renderControls(); update(); renderRef();
+const hash = (location.hash || '').slice(1);
+showTab(TABS.includes(hash) ? hash : store.get('css452-tab', 'cheat'), false);
+</script>
+
+</body>
+</html>
