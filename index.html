@@ -319,6 +319,15 @@ svg.board .pinrow:hover .pb:not(.used) { stroke: var(--accent); stroke-width: 2;
 .pv-btn { background: #4CAF50; border: none; color: #FFFFFF; padding: 10px 28px; font-size: 19px; margin: 2px; cursor: pointer; font-family: Helvetica, Arial, sans-serif; }
 .pv-btn.off { background: #555555; }
 .pv-btn.alloff { background: #C0392B; }
+.libs { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13px; }
+.libs .lbl { font: 600 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lib { display: inline-flex; align-items: center; gap: 6px; }
+.lib code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+.lib .k { font: 700 10px/1 var(--f-mono); letter-spacing: .05em; padding: 3px 5px; border-radius: 3px; border: 1px solid; }
+.lib .k.install { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
+.lib .k.builtin { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
+.lib .k.board { color: var(--info); border-color: var(--info); background: var(--info-soft); }
+.libs-card { padding: 10px 14px; }
 .wake-row { padding: 6px 10px; }
 .pv-req { font: 12px/1.5 var(--f-mono); color: var(--muted); }
 .pv-req b { color: var(--accent); }
@@ -382,6 +391,7 @@ svg.board .pinrow:hover .pb:not(.used) { stroke: var(--accent); stroke-width: 2;
         <nav class="out-nav" aria-label="Jump to"><a href="#b-codebox" data-go="b-codebox">Code</a><a href="#b-wirecard" data-go="b-wirecard">Wiring</a><a href="#b-webcard" data-go="b-webcard" id="nav-web" hidden>Web page</a><a href="#b-boardcard" data-go="b-boardcard">Board pins</a></nav>
         <div class="warns" id="warns" aria-live="polite"></div>
         <div class="sel-bar" id="sel-bar" hidden></div>
+        <div class="card libs-card" id="b-libs"></div>
         <div class="codebox" id="b-codebox">
           <div class="codebar"><span class="name" id="b-codename">sketch.ino</span>
             <button class="btn small" id="b-dl" hidden>Save .ino</button>
@@ -465,6 +475,14 @@ function mqttMatch(filter, topic) {
   }
   return fp.length === tp.length;
 }
+
+// Libraries behind each #include. "builtin" ships with the ESP32 board package.
+const LIBS = {
+  'WiFi.h': { name: 'WiFi', kind: 'builtin', how: 'included with the esp32 board package' },
+  'HTTPClient.h': { name: 'HTTPClient', kind: 'builtin', how: 'included with the esp32 board package' },
+  'time.h': { name: 'time.h (NTP)', kind: 'builtin', how: 'part of the ESP32 toolchain' },
+  'PubSubClient.h': { name: 'PubSubClient by Nick O\'Leary', kind: 'install', how: 'Sketch → Include Library → Manage Libraries, search "PubSubClient", install the one by Nick O\'Leary' },
+};
 
 function blankConfig() {
   return {
@@ -1441,7 +1459,17 @@ function generate(input) {
 
   const order = { err: 0, warn: 1, info: 2 };
   W.sort((a, b) => order[a.lvl] - order[b.lvl]);
-  return { code: fin.code, lineTags: fin.lineTags, warnings: W, parts, config: c, webOrder, rowOrder };
+  // ---------- libraries this sketch needs ----------
+  const libs = [{ name: 'esp32 by Espressif Systems', kind: 'board', how: 'Tools → Board → Boards Manager, search "esp32"' }];
+  inc.forEach(line => {
+    const h = (/[<"]([^>"]+)[>"]/.exec(line) || [])[1];
+    if (!h) return;
+    const known = LIBS[h];
+    if (known) libs.push({ header: h, ...known });
+  });
+  if (libs.some(l => l.kind === 'install')) warn('info', 'This sketch needs a library that is not built in: ' + libs.filter(l => l.kind === 'install').map(l => l.name).join(', ') + '. Install it before the exam (Sketch → Include Library → Manage Libraries).');
+
+  return { code: fin.code, lineTags: fin.lineTags, warnings: W, parts, config: c, webOrder, rowOrder, libs };
 }
 
 </script>
@@ -1921,6 +1949,12 @@ function boardLegend(withUsed) {
   return (withUsed ? k('--accent', 'Used by this sketch', 'var(--accent)') : '') + k('--pin-adc1', 'ADC1 (works with WiFi)') + k('--pin-adc2', 'ADC2 (not with WiFi)') + k('--pin-uart', 'UART') + k('--pin-spi', 'SPI') + k('--pin-i2c', 'I2C') + k('--pin-pwr', 'Power / EN') + k('--pin-strap', 'Strapping pin (dashed)') + k('--pin-flash', 'SPI flash: do not use', 'var(--pin-flash)') + '<span>I = input only · I/O = input/output · A5 (1.5) = analog name (ADC unit.channel)</span>';
 }
 
+function libsHtml(libs) {
+  const tag = { install: 'INSTALL', builtin: 'BUILT IN', board: 'BOARD' };
+  return `<div class="libs"><span class="lbl">Libraries</span>${libs.map(l => `<span class="lib" title="${esc(l.how)}"><span class="k ${l.kind}">${tag[l.kind]}</span>${l.header ? `<code>${esc(l.header)}</code> · ` : ''}${esc(l.name)}</span>`).join('')}</div>${
+    libs.some(l => l.kind === 'install') ? `<p class="hint" style="margin:6px 0 0">Install before the exam: ${libs.filter(l => l.kind === 'install').map(l => esc(l.how)).join('; ')}.</p>` : ''}`;
+}
+
 /* ===================== tabs ===================== */
 const TABS = ['cheat', 'builder', 'ref'];
 function showTab(t, push) {
@@ -1967,6 +2001,7 @@ function renderEntries() {
       html += `<article class="entry" id="e-${e.id}">
         <header><div class="tags">${e.tags.map((t, i) => `<span class="tag${i === 0 ? ' primary' : ''}">${esc(t)}</span>`).join('')}</div><h3>${esc(e.title)}</h3></header>
         <p class="task"><span class="lbl">Task</span>${esc(e.task)}</p>
+        ${libsHtml(results.flatMap(([, , r]) => r.libs).filter((l, i, a) => a.findIndex(x => x.name === l.name) === i))}
         ${e.note ? `<div class="callout warn"><b>Heads up.</b> ${e.note}</div>` : ''}
         <div class="entry-grid"><div>${wiring}</div>
           <div><h4>Key ideas</h4><ul>${e.ideas.map(i => `<li>${i}</li>`).join('')}</ul>
@@ -2134,6 +2169,7 @@ function update() {
   const lv = { err: 'ERROR', warn: 'CHECK', info: 'NOTE' };
   const errs = r.warnings.filter(w => w.lvl === 'err').length;
   $('#warns').innerHTML = (errs ? '' : `<div class="warn-item ok"><span class="lv">OK</span><span>No pin conflicts found.</span></div>`) + r.warnings.map(w => `<div class="warn-item ${w.lvl}"><span class="lv">${lv[w.lvl]}</span><span>${esc(w.msg)}</span></div>`).join('');
+  $('#b-libs').innerHTML = libsHtml(r.libs);
   $('#b-wiring').innerHTML = wiringSVG(r.parts);
   $('#b-pins').innerHTML = pinTable(r.parts);
   const codeLines = r.code.replace(/\n$/, '').split('\n');
