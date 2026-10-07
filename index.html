@@ -961,7 +961,7 @@ function generate(input) {
 
   // ---------- WiFi ----------
   if (needNet) at('wifi', () => {
-    addInc('#include <WiFi.h>');
+    addInc('#include <WiFi.h>  //! built into the ESP32 board package (nothing to install)');
     gNet.push(`const char* ssid = "${q(c.wifi.ssid)}";  //! ${ap ? 'name of the network the ESP32 creates' : 'your hotspot name (2.4 GHz only!)'}`);
     gNet.push(`const char* password = "${q(c.wifi.pass)}";`);
     if (/^Your (SSID|Password)$/.test(c.wifi.ssid) || /^Your (SSID|Password)$/.test(c.wifi.pass)) warn('warn', 'WiFi name/password are still placeholders. Fill in your hotspot details in the WiFi block.');
@@ -999,7 +999,7 @@ function generate(input) {
 
   // ---------- NTP ----------
   if (c.ntp.on) at('ntp', () => {
-    addInc('#include "time.h"');
+    addInc('#include "time.h"  //! built in: date/time functions for NTP');
     gNet.push('const char* ntpServer = "pool.ntp.org";', `const long gmtOffset_sec = ${c.ntp.gmt} * 3600;  //! Thailand = GMT+7 -> 25200 s`, 'const int daylightOffset_sec = 0;  //! no daylight saving in Thailand');
     fns.push([
       'void printLocalTime() {',
@@ -1020,7 +1020,7 @@ function generate(input) {
 
   // ---------- ThingSpeak ----------
   if (c.ts.on) at('ts', () => {
-    addInc('#include <HTTPClient.h>');
+    addInc('#include <HTTPClient.h>  //! built into the ESP32 board package (nothing to install)');
     gNet.push(`String serverName = "http://api.thingspeak.com/update?api_key=${q(c.ts.key)}";  //! your channel's WRITE API key`);
     gState.push('unsigned long lastTime = 0;', `unsigned long timerDelay = ${c.ts.ms};  //! send every ${c.ts.ms / 1000} s`);
     if (+c.ts.ms < 15000) warn('warn', 'ThingSpeak free accounts accept one update per 15 s. Faster updates are rejected (response body "0"). Use 15000 ms or more.');
@@ -1058,7 +1058,7 @@ function generate(input) {
 
   // ---------- MQTT ----------
   if (mq.on) at('mqtt', () => {
-    addInc('#include <PubSubClient.h>');
+    addInc('#include <PubSubClient.h>  // INSTALL FIRST: Library Manager -> "PubSubClient" by Nick O\'Leary');
     if (!mqttPub && !mqttSub) warn('warn', 'MQTT is on but neither Publish nor Subscribe is ticked.');
     const sameTopic = !routes.length && (!(mqttPub && mqttSub) || mq.pubTopic === mq.subTopic);
     const pubT = sameTopic ? 'Topic' : 'PubTopic', subT = sameTopic ? 'Topic' : 'SubTopic';
