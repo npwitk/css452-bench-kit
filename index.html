@@ -493,11 +493,11 @@ function blankConfig() {
     sensors: { on: false, pot: false, potPin: 36, touch: false, touchPin: 32, hall: false, interval: false, ms: 1000 },
     touch: { on: false, pin: 32, thr: 20, action: 'restart', led: 17 },
     sleep: { on: false, trigger: 'delay', delayS: 10, btn: 26, wake: 'timer', timerS: 5, ext0Pin: 32, ext0Level: 'LOW',
-             ext1Pins: '2,32', ext1Mode: 'ANY_HIGH', touchPin: 32, touchThr: 40, bootCount: true, reason: false, ledsOff: false },
+             ext1Pins: '2,32', ext1Mode: 'ANY_HIGH', touchPin: 32, touchThr: 40, bootCount: true, reason: false, ledsOff: false, btnPull: 'ext' },
     wifi: { on: false, mode: 'STA', ssid: 'Your SSID', pass: 'Your Password' },
     ntp: { on: false, gmt: 7, ms: 1000, disconnect: true },
     web: { on: false, title: 'ESP32 Web Server', pot: false, potPin: 36, volt: false, touch: false, touchPin: 32, btn: false, btnPin: 34, uptime: false, allOff: false,
-           outputs: [], refresh: 0, order: [], rowOrder: [] },
+           outputs: [], refresh: 0, order: [], rowOrder: [], btnStyle: 'toggle' },
     ts: { on: false, key: 'YOUR_WRITE_API_KEY', ms: 15000, f1: 'pot', f2: 'random', f3: 'none', potPin: 36 },
     mqtt: { on: false, server: 'broker.hivemq.com', port: 1883, clientId: 'Client_YourStudentID',
             pub: false, pubTopic: 'IoT/PotenValue_YourStudentID', pubSrc: 'pot', pubPin: 36, pubMs: 2000,
@@ -633,15 +633,16 @@ function generate(input) {
 
   // ---------- naming: buttons ----------
   const btns = [];
-  const addBtn = (pin, role, block) => {
+  const addBtn = (pin, role, block, pull) => {
     pin = +pin;
     let b = btns.find(x => x.pin === pin);
-    if (!b) { b = { pin, roles: [], blocks: [] }; btns.push(b); }
+    if (!b) { b = { pin, roles: [], blocks: [], pull: 'ext' }; btns.push(b); }
     b.roles.push(role); b.blocks.push(block);
+    if (pull === 'int') b.pull = 'int';   // any block asking for INPUT_PULLUP wins
   };
-  c.holds.forEach((h, i) => addBtn(h.btn, 'hold', 'hold-' + i));
-  c.toggles.forEach((t, i) => addBtn(t.btn, 'toggle', 'toggle-' + i));
-  if (sl.on && sl.trigger === 'button') addBtn(sl.btn, 'sleep', 'sleep');
+  c.holds.forEach((h, i) => addBtn(h.btn, 'hold', 'hold-' + i, h.pull));
+  c.toggles.forEach((t, i) => addBtn(t.btn, 'toggle', 'toggle-' + i, t.pull));
+  if (sl.on && sl.trigger === 'button') addBtn(sl.btn, 'sleep', 'sleep', sl.btnPull);
   if (mqttPub && mq.pubSrc === 'button') addBtn(mq.pubPin, 'mqtt', 'mqtt-pub');
   if (c.web.on && c.web.btn) addBtn(c.web.btnPin, 'web', 'web-table');
   const btnName = pin => { const i = btns.findIndex(b => b.pin === +pin); return i === 0 ? 'buttonPin' : `sw${i}Pin`; };
@@ -673,7 +674,7 @@ function generate(input) {
   const addInc = s => { if (!inc.some(x => x.startsWith(s))) inc.push(s); };
   let needMillis = false;
 
-  btns.forEach(b => at(b.blocks.join(' '), () => gPins.push(`const int ${btnName(b.pin)} = ${pinExpr(b.pin)};  //! push button ${btnLabel(b.pin)}${typed[b.pin] ? ' (' + typed[b.pin] + ' = GPIO' + b.pin + ')' : ''} (10k pull-up -> not pressed = HIGH, pressed = LOW)`)));
+  btns.forEach(b => at(b.blocks.join(' '), () => gPins.push(`const int ${btnName(b.pin)} = ${pinExpr(b.pin)};  //! push button ${btnLabel(b.pin)}${typed[b.pin] ? ' (' + typed[b.pin] + ' = GPIO' + b.pin + ')' : ''} (${b.pull === 'int' ? 'internal pull-up' : '10k pull-up'} -> not pressed = HIGH, pressed = LOW)`)));
   pots.forEach(p => at(p.blocks.join(' '), () => gPins.push(`const int ${potName(p.pin)} = ${pinExpr(p.pin, 'pot')};  //! potentiometer wiper: ${pinInfo(p.pin)}`)));
   touches.forEach(p => at(p.blocks.join(' '), () => gPins.push(`const int ${touchName(p.pin)} = ${pinExpr(p.pin)};  //! bare wire on a touch pin (${TOUCH_T[p.pin] || 'not a touch pin!'})`)));
   leds.forEach(l => at(l.blocks.join(' '), () => gPins.push(`const int ${ledName(l.pin)} = ${pinExpr(l.pin)};  //! ${ledLabel(l.pin)}${typed[l.pin] ? ' (' + typed[l.pin] + ' = GPIO' + l.pin + ')' : ''}${l.low ? ' (active LOW: LOW = on)' : ''}`)));
@@ -753,7 +754,10 @@ function generate(input) {
   });
 
   // ---------- pin modes ----------
-  btns.forEach(b => at(b.blocks.join(' '), () => setup.push(`pinMode(${btnName(b.pin)}, INPUT);  //! external 10k pull-up to 3V3 (GPIO34-39 have no internal pull-ups)`)));
+  btns.forEach(b => at(b.blocks.join(' '), () => setup.push(b.pull === 'int'
+    ? `pinMode(${btnName(b.pin)}, INPUT_PULLUP);  //! internal pull-up: switch goes straight to GND, no resistor needed`
+    : `pinMode(${btnName(b.pin)}, INPUT);  //! external 10k pull-up to 3V3 (GPIO34-39 have no internal pull-ups)`)));
+  btns.forEach(b => { if (b.pull === 'int' && PINS.INPUT_ONLY.includes(b.pin)) warn('err', `GPIO${b.pin} has no internal pull-up (34–39 never do). Use an external 10k pull-up, or move the button to a pin like GPIO4, 25, 26 or 27.`); });
   leds.forEach(l => {
     if (l.roles.includes('pwm') || l.roles.includes('mqttPwm')) return;
     at(l.blocks.join(' '), () => {
@@ -783,22 +787,24 @@ function generate(input) {
   if (singleHold) at('hold-0', () => gState.push('int buttonState = 0;  //! last value read from the button'));
   const holdBody = h => {
     const bn = btnName(h.btn), ln = ledName(h.led), low = ledLow(h.led);
+    const inv = h.when === 'released';   // LED on while NOT pressed
+    const onPress = inv ? OFF(low) : ON(low), onRelease = inv ? ON(low) : OFF(low);
     if (singleHold) {
       return [
         `buttonState = digitalRead(${bn});  //! HIGH = not pressed, LOW = pressed`,
         ...(h.print ? ['Serial.println(buttonState);'] : []),
         'if (buttonState == LOW) {',
-        `  digitalWrite(${ln}, ${ON(low)});  //! pressed -> ${ledLabel(h.led)} on`,
+        `  digitalWrite(${ln}, ${onPress});  //! pressed -> ${ledLabel(h.led)} ${inv ? 'off' : 'on'}`,
         '} else {',
-        `  digitalWrite(${ln}, ${OFF(low)});  //! released -> ${ledLabel(h.led)} off`,
+        `  digitalWrite(${ln}, ${onRelease});  //! released -> ${ledLabel(h.led)} ${inv ? 'on' : 'off'}`,
         '}',
       ];
     }
     return [
       `if (digitalRead(${bn}) == LOW) {  //! ${btnLabel(h.btn)} pressed?`,
-      `  digitalWrite(${ln}, ${ON(low)});`,
+      `  digitalWrite(${ln}, ${onPress});${inv ? '  //! this LED is on only while the button is NOT pressed' : ''}`,
       '} else {',
-      `  digitalWrite(${ln}, ${OFF(low)});`,
+      `  digitalWrite(${ln}, ${onRelease});`,
       '}',
     ];
   };
@@ -1306,12 +1312,18 @@ function generate(input) {
       else {
         const i = outs.findIndex(o => 'out-' + o.pin === k), o = outs[i];
         at('web-out-' + i, () => {
-          P(String.raw`client.println("<p>GPIO ${o.pin} - State " + output${o.pin}State + "</p>");`);
-          P(`if (output${o.pin}State == "off") {  //! show ON button when off, OFF button when on`);
-          P(String.raw`  client.println("<p><a href=\"/${o.pin}/on\"><button class=\"button\">ON</button></a></p>");`);
-          P('} else {');
-          P(String.raw`  client.println("<p><a href=\"/${o.pin}/off\"><button class=\"button button2\">OFF</button></a></p>");`);
-          P('}');
+          const name = q(String(o.label || '').trim() || `GPIO ${o.pin}`).replace(/</g, '');
+          P(String.raw`client.println("<p>${name} - State " + output${o.pin}State + "</p>");`);
+          if (c.web.btnStyle === 'both') {
+            P(String.raw`client.println("<p><a href=\"/${o.pin}/on\"><button class=\"button\">ON</button></a>");  //! both buttons always shown`);
+            P(String.raw`client.println("<a href=\"/${o.pin}/off\"><button class=\"button button2\">OFF</button></a></p>");`);
+          } else {
+            P(`if (output${o.pin}State == "off") {  //! show ON button when off, OFF button when on`);
+            P(String.raw`  client.println("<p><a href=\"/${o.pin}/on\"><button class=\"button\">ON</button></a></p>");`);
+            P('} else {');
+            P(String.raw`  client.println("<p><a href=\"/${o.pin}/off\"><button class=\"button button2\">OFF</button></a></p>");`);
+            P('}');
+          }
         });
       }
     });
@@ -1437,7 +1449,7 @@ function generate(input) {
     const kinds = new Set(modes.map(m => (m === 'OUTPUT' || m === 'PWM' ? 'out' : 'in')));
     if (kinds.size > 1) warn('err', `GPIO${p} is used as both an input and an output (${list.map(u => u.role).join(', ')}).`);
     else if (modes.length > 1 && !(modes.every(m => m === 'INPUT' || m === 'WAKE'))) warn('warn', `GPIO${p} is used by several blocks (${list.map(u => u.role).join(', ')}).`);
-    if (modes.includes('INPUT') && PINS.INPUT_ONLY.includes(p)) pullupNote = true;
+    if (modes.includes('INPUT') && PINS.INPUT_ONLY.includes(p) && !btns.some(b => b.pin === p && b.pull === 'int')) pullupNote = true;
   });
   if (pullupNote) warn('info', 'Buttons on GPIO34–39: these pins have no internal pull-up, so the external 10k resistor to 3V3 is required.');
   if (c.pwmApi === 'v2' && pwmGlobals) warn('info', 'Using the ESP32 core 2.x PWM syntax (ledcSetup / ledcAttachPin). On core 3.x switch to "core 3.x" or it will not compile.');
@@ -1445,7 +1457,7 @@ function generate(input) {
 
   // ---------- wiring parts ----------
   const parts = [];
-  btns.forEach(b => parts.push({ type: 'btn', pin: b.pin, label: btnLabel(b.pin), blocks: b.blocks }));
+  btns.forEach(b => parts.push({ type: b.pull === 'int' ? 'btnInt' : 'btn', pin: b.pin, label: btnLabel(b.pin), blocks: b.blocks }));
   wakePins.forEach(w => {
     if (w.pull === 'touch') { if (!touches.some(t => t.pin === w.pin)) parts.push({ type: 'touch', pin: w.pin, label: 'Touch to wake', blocks: ['sleep'] }); return; }
     if (btns.some(b => b.pin === w.pin) || parts.some(p => p.pin === w.pin)) return;
@@ -1454,7 +1466,7 @@ function generate(input) {
   pots.forEach(p => parts.push({ type: 'pot', pin: p.pin, label: 'Potentiometer', blocks: p.blocks }));
   touches.forEach(p => parts.push({ type: 'touch', pin: p.pin, label: 'Touch wire', blocks: p.blocks }));
   leds.forEach(l => parts.push({ type: l.low ? 'ledLow' : 'led', pin: l.pin, label: ledLabel(l.pin), blocks: l.blocks }));
-  (c.web.on ? c.web.outputs : []).forEach((o, i) => parts.push({ type: o.low ? 'ledLow' : 'led', pin: +o.pin, label: leds.length ? `Web LED ${i + 1}` : `LED${i + 1}`, blocks: ['web', 'web-out-' + i] }));
+  (c.web.on ? c.web.outputs : []).forEach((o, i) => parts.push({ type: o.low ? 'ledLow' : 'led', pin: +o.pin, label: String(o.label || '').trim() || (leds.length ? `Web LED ${i + 1}` : `LED${i + 1}`), blocks: ['web', 'web-out-' + i] }));
   parts.forEach(p => { p.alias = GPIO_ANALOG[p.pin] && (p.type === 'pot' || typed[p.pin]) ? GPIO_ANALOG[p.pin] : null; });
 
   const order = { err: 0, warn: 1, info: 2 };
@@ -1504,6 +1516,9 @@ const PRESETS = {
   mock11: { name: 'Mock 1.1 · Snooze lamp', cfg: { blinks: [{ led: 16, ms: 1000, potOn: true, pot: 'A4', minMs: 200, maxMs: 2000 }], toggles: [{ btn: 34, led: 17, edge: 'FALLING', debounce: true }], sensors: { on: true, pot: true, potPin: 'A4', interval: true, ms: 1000 }, sleep: { on: true, trigger: 'button', btn: 26, wTimer: true, timerS: 10, wExt0: true, wExt1: false, wTouch: false, ext0Pin: 34, ext0Level: 'LOW', bootCount: true, reason: true, ledsOff: true } } },
   mock12: { name: 'Mock 1.2 · Control panel web server', cfg: { wifi: WIFI, web: { on: true, title: 'CSS452 Practical', pot: true, volt: true, potPin: 'A5', btn: true, btnPin: 34, outputs: [{ pin: 16 }, { pin: 17 }, { pin: 27 }], allOff: true, refresh: 3 } } },
   mock13: { name: 'Mock 1.3 · MQTT topic router', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_YourStudentID', pub: true, pubTopic: 'CSS452/YourStudentID/pot', pubSrc: 'pot', pubPin: 'A4', pubMs: 2000, sub: true, subTopic: 'CSS452/YourStudentID/#', routes: [{ topic: 'CSS452/YourStudentID/led1', action: 'onoff', led: 16, thr: 500, ledLow: false }, { topic: 'CSS452/YourStudentID/pot', action: 'threshold', led: 17, thr: 2000, ledLow: false }], status: true, statusTopic: 'CSS452/YourStudentID/status', statusMsg: 'online' } } },
+  examA1: { name: 'Exam A1 · One switch, two LEDs (opposite)', cfg: { holds: [{ btn: 4, led: 26, pull: 'int', when: 'pressed' }, { btn: 4, led: 27, pull: 'int', when: 'released' }] } },
+  examA2: { name: 'Exam A2 · MQTT on/off for an LED', cfg: { wifi: WIFI, mqtt: { on: true, clientId: 'Client_YourStudentID', sub: true, subTopic: 'IoT2026ExamQ2', subAction: 'onoff', subLed: 26 } } },
+  examA3: { name: 'Exam A3 · Pot threshold + web ON/OFF buttons', cfg: { wifi: WIFI, potLed: { on: true, pot: 'A5', led: 26, thr: 750 }, web: { on: true, outputs: [{ pin: 16, label: 'LED2' }, { pin: 17, label: 'LED3' }], btnStyle: 'both' } } },
 };
 const PRESET_GROUPS = [
   ['Lecture 3 · GPIO, analog, touch, WiFi', ['ex1', 'l3pot', 'hw1p1', 'hw1p2', 'hw1p3', 'softap']],
@@ -1511,6 +1526,7 @@ const PRESET_GROUPS = [
   ['Lecture 5 · Web servers & clients', ['ex3', 'hw3p1', 'hw3p2', 'hw3p3']],
   ['Lecture 6 · MQTT', ['ex4pub', 'ex4sub', 'hw4p1', 'hw4p2n1', 'hw4p2n2']],
   ['Practical mock exam', ['mock11', 'mock12', 'mock13']],
+  ['Practical exam · 8 Oct 2026', ['examA1', 'examA2', 'examA3']],
 ];
 
 /* ===================== Cheat-sheet entries ===================== */
@@ -1520,6 +1536,7 @@ const GROUPS = [
   { id: 'l5', title: 'Lecture 5', sub: 'Web server and web client' },
   { id: 'l6', title: 'Lecture 6', sub: 'MQTT publish / subscribe' },
   { id: 'mock', title: 'Practical mock', sub: 'Mock Exam/Practical, problems 1.1–1.3' },
+  { id: 'exam', title: 'Practical exam', sub: '8 Oct 2026, reconstructed from A1–A3' },
 ];
 
 const ENTRIES = [
@@ -1795,6 +1812,42 @@ const ENTRIES = [
     ],
     variants: ['Add a third topic: “+ Act per topic” in the builder adds another route.', 'Brightness instead of on/off: set a route to “LED brightness from value”.'],
   },
+  {
+    id: 'examA1', group: 'exam', tags: ['Exam A1', 'L3'], title: 'One switch, two LEDs that do the opposite',
+    task: 'SW1 on GPIO4 using the internal pull-up. While SW1 is pressed LED1 (GPIO26) is on and LED2 (GPIO27) is off; when released, LED1 is off and LED2 is on.',
+    codes: [['', 'examA1']],
+    ideas: [
+      '<code>pinMode(4, INPUT_PULLUP)</code> turns on the internal pull-up: wire the switch from GPIO4 straight to GND, no 10 kΩ needed.',
+      'Pressed still reads <b>LOW</b>, exactly like the external pull-up circuit.',
+      'Both LEDs come from one <code>digitalRead()</code>: one follows it, the other is the opposite.',
+      'GPIO34–39 have no internal pull-up, which is why the exam moved the switch to GPIO4.',
+    ],
+    variants: ['External 10 kΩ instead: set the hold block\'s wiring to “External 10k pull-up”.', 'Toggle instead of hold: use a “Button toggles LED” block.'],
+  },
+  {
+    id: 'examA2', group: 'exam', tags: ['Exam A2', 'L6'], title: 'MQTT: switch an LED with "on" / "off"',
+    task: 'Subscribe to IoT2026ExamQ2 on broker.hivemq.com. Message "on" turns the LED on GPIO26 on; "off" turns it off.',
+    codes: [['', 'examA2']],
+    ideas: [
+      'Build a <code>String</code> from the payload bytes, then compare with <code>equalsIgnoreCase("on")</code>.',
+      'Subscribe inside <code>ConnectMQTT()</code> so a reconnect subscribes again.',
+      'Test from the HiveMQ WebSocket client: publish <code>on</code> to <code>IoT2026ExamQ2</code>.',
+      'Library: install PubSubClient by Nick O\'Leary.',
+    ],
+    variants: ['Use a number threshold instead of text: set “On message” to “LED on if value > threshold”.'],
+  },
+  {
+    id: 'examA3', group: 'exam', tags: ['Exam A3', 'L3 + L5'], title: 'Pot threshold LED + web page with ON and OFF buttons',
+    task: 'LED1 (GPIO26) is on while the pot on A5 reads above 750. A web page shows LED2 (GPIO16) and LED3 (GPIO17), each with its own ON button and OFF button.',
+    codes: [['', 'examA3']],
+    ideas: [
+      'The threshold check runs every pass of <code>loop()</code>, so it keeps working while the web server waits for browsers.',
+      'Separate buttons: print both links every time (<code>/16/on</code> and <code>/16/off</code>) instead of the Exercise 3 if/else that shows only one.',
+      'The page text can name the LED (“LED2 - State on”) even though the code still checks <code>GET /16/on</code>.',
+      'A5 = GPIO33 is ADC1, so it reads correctly while WiFi is on.',
+    ],
+    variants: ['One toggle button per LED: set “Buttons” to “One button that flips”.', 'Show the pot value on the page: tick “Pot value” in the sensor table.'],
+  },
 ];
 
 </script>
@@ -1872,6 +1925,10 @@ function wiringSVG(parts) {
       s += t.s + ln(4 + t.w, cy, 80, cy, 'pwr') + res(80, cy, '10 kΩ') + ln(124, cy, 200, cy, 'sig') + dot(200, cy) + ln(200, cy, 236, cy, 'sig') + tag(236, cy, gp(p), 'gpio').s
         + ln(200, cy, 200, cy + 18, 'gnd') + swV(200, cy + 18, p.label) + ln(200, cy + 42, 200, cy + 56, 'gnd') + gnd(200, cy + 56)
         + `<text class="small" x="216" y="${cy + 76}">GND</text>` + note(cy, 'open = HIGH') + note(cy + 18, 'pressed = LOW');
+    } else if (p.type === 'btnInt') {
+      h = 58; const cy = 26; const t = tag(4, cy, gp(p), 'gpio');
+      s += t.s + ln(4 + t.w, cy, 150, cy, 'sig') + swH(150, cy, p.label) + ln(176, cy, 220, cy, 'gnd') + gnd(220, cy)
+        + `<text class="small" x="234" y="${cy + 22}">GND</text>` + note(cy, 'INPUT_PULLUP · no resistor') + note(cy + 18, 'pressed = LOW');
     } else if (p.type === 'btnDown') {
       h = 112; const cy = 26; const t = tag(4, cy, '3V3', 'pwr');
       s += t.s + ln(4 + t.w, cy, 96, cy, 'pwr') + swH(96, cy, p.label) + ln(122, cy, 200, cy, 'sig') + dot(200, cy) + ln(200, cy, 236, cy, 'sig') + tag(236, cy, gp(p), 'gpio').s
@@ -1898,6 +1955,7 @@ function pinTable(parts) {
   if (!parts.length) return '<p class="hint">No external parts.</p>';
   const desc = p => ({
     btn: [`Push button ${p.label}`, 'Pin ← 10 kΩ ← 3V3; switch from pin to GND'],
+    btnInt: [`Push button ${p.label}`, 'Other side of the switch → GND (internal pull-up, no resistor)'],
     btnDown: [`Push button ${p.label}`, 'Pin → 10 kΩ → GND; switch from pin to 3V3'],
     pot: ['Potentiometer middle leg', 'Outer legs: 3V3 and GND'],
     touch: ['Bare jumper wire', 'Nothing else; touch the free end'],
@@ -2090,8 +2148,8 @@ function renderControls() {
     <div class="row">${sel('pwmApi', 'PWM syntax', [['v3', 'ESP32 core 3.x (ledcAttach)'], ['v2', 'ESP32 core 2.x (ledcSetup + channel)']], true)}</div>
     <div class="row">${chk('explain', 'Explanation comments in code')}</div>`, 'global');
 
-  const holds = c.holds.map((x, i) => `<div class="item" data-block="hold-${i}"><div class="item-head"><b style="font-size:13px">Hold ${i + 1}</b>${codeBtn('hold-' + i)}</div><div class="row">${num(`holds.${i}.btn`, 'Button pin', PIN_ATTR)}${num(`holds.${i}.led`, 'LED pin', PIN_ATTR)}<button class="btn ghost small" data-act="del:holds:${i}" aria-label="Remove">Remove</button></div><div class="row">${chk(`holds.${i}.ledLow`, 'LED active LOW')}${chk(`holds.${i}.print`, 'Print button state')}</div></div>`).join('');
-  const toggles = c.toggles.map((x, i) => `<div class="item" data-block="toggle-${i}"><div class="item-head"><b style="font-size:13px">Toggle ${i + 1}</b>${codeBtn('toggle-' + i)}</div><div class="row">${num(`toggles.${i}.btn`, 'Button pin', PIN_ATTR)}${num(`toggles.${i}.led`, 'LED pin', PIN_ATTR)}${sel(`toggles.${i}.edge`, 'Trigger', [['FALLING', 'FALLING (press)'], ['RISING', 'RISING (release)'], ['CHANGE', 'CHANGE (both)']])}<button class="btn ghost small" data-act="del:toggles:${i}">Remove</button></div><div class="row">${chk(`toggles.${i}.debounce`, 'Debounce 200 ms')}${chk(`toggles.${i}.ledLow`, 'LED active LOW')}</div></div>`).join('');
+  const holds = c.holds.map((x, i) => `<div class="item" data-block="hold-${i}"><div class="item-head"><b style="font-size:13px">Hold ${i + 1}</b>${codeBtn('hold-' + i)}</div><div class="row">${num(`holds.${i}.btn`, 'Button pin', PIN_ATTR)}${num(`holds.${i}.led`, 'LED pin', PIN_ATTR)}<button class="btn ghost small" data-act="del:holds:${i}" aria-label="Remove">Remove</button></div><div class="row">${sel(`holds.${i}.when`, 'LED is on', [['pressed', 'while pressed'], ['released', 'while NOT pressed']])}${sel(`holds.${i}.pull`, 'Button wiring', [['ext', 'External 10k pull-up'], ['int', 'Internal pull-up (INPUT_PULLUP)']])}</div><div class="row">${chk(`holds.${i}.ledLow`, 'LED active LOW')}${chk(`holds.${i}.print`, 'Print button state')}</div></div>`).join('');
+  const toggles = c.toggles.map((x, i) => `<div class="item" data-block="toggle-${i}"><div class="item-head"><b style="font-size:13px">Toggle ${i + 1}</b>${codeBtn('toggle-' + i)}</div><div class="row">${num(`toggles.${i}.btn`, 'Button pin', PIN_ATTR)}${num(`toggles.${i}.led`, 'LED pin', PIN_ATTR)}${sel(`toggles.${i}.edge`, 'Trigger', [['FALLING', 'FALLING (press)'], ['RISING', 'RISING (release)'], ['CHANGE', 'CHANGE (both)']])}<button class="btn ghost small" data-act="del:toggles:${i}">Remove</button></div><div class="row">${sel(`toggles.${i}.pull`, 'Button wiring', [['ext', 'External 10k pull-up'], ['int', 'Internal pull-up (INPUT_PULLUP)']])}</div><div class="row">${chk(`toggles.${i}.debounce`, 'Debounce 200 ms')}${chk(`toggles.${i}.ledLow`, 'LED active LOW')}</div></div>`).join('');
   const blinks = c.blinks.map((x, i) => `<div class="item" data-block="blink-${i}"><div class="item-head"><b style="font-size:13px">Blink ${i + 1}</b>${codeBtn('blink-' + i)}</div><div class="row">${num(`blinks.${i}.led`, 'LED pin', PIN_ATTR)}${x.potOn ? '' : num(`blinks.${i}.ms`, 'On/off time (ms)', 'min="10" step="100"')}<button class="btn ghost small" data-act="del:blinks:${i}">Remove</button></div>
     <div class="row">${chk(`blinks.${i}.potOn`, 'Speed set by a pot')}${chk(`blinks.${i}.ledLow`, 'LED active LOW')}</div>
     ${x.potOn ? `<div class="row">${num(`blinks.${i}.pot`, 'Pot pin', PIN_ATTR)}${num(`blinks.${i}.minMs`, 'Fastest (ms)', 'min="10" step="50"')}${num(`blinks.${i}.maxMs`, 'Slowest (ms)', 'min="10" step="50"')}</div><p class="hint">On/off time = <code>map(pot, 0, 4095, ${x.minMs ?? 200}, ${x.maxMs ?? 2000})</code>, read every pass.</p>` : ''}</div>`).join('');
@@ -2112,6 +2170,7 @@ function renderControls() {
   h += sec('sleep', 'Deep sleep', s.on, s.on ? `${s.trigger === 'button' ? 'button press' : s.delayS + ' s awake'} → wake by ${wakeNames.join(' or ') || 'reset only'}` : '', `
     ${chk('sleep.on', '<b>Use deep sleep</b>')}
     ${s.on ? `<div class="row">${sel('sleep.trigger', 'Go to sleep', [['button', 'When a button is pressed (interrupt)'], ['delay', 'After N seconds awake']], true)}${s.trigger === 'button' ? num('sleep.btn', 'Button pin', PIN_ATTR) : num('sleep.delayS', 'Seconds awake', 'min="1"')}</div>
+    ${s.trigger === 'button' ? `<div class="row">${sel('sleep.btnPull', 'Sleep button wiring', [['ext', 'External 10k pull-up'], ['int', 'Internal pull-up (INPUT_PULLUP)']])}</div>` : ''}
     <p class="hint" style="margin-top:4px"><b>Wake up by</b> (tick one or more; whichever happens first wakes the board)</p>
     ${wakeRow('wTimer', 'Timer', num('sleep.timerS', 'After (s)', 'min="1"'))}
     ${wakeRow('wExt0', 'Button (ext0, one pin)', num('sleep.ext0Pin', 'Pin', PIN_ATTR) + sel('sleep.ext0Level', 'Wake when', [['LOW', 'LOW (pull-up button)'], ['HIGH', 'HIGH (pull-down button)']]))}
@@ -2131,9 +2190,10 @@ function renderControls() {
   h += sec('ntp', 'NTP date & time', c.ntp.on, '', `${chk('ntp.on', '<b>Get time from pool.ntp.org</b>')}
     ${c.ntp.on ? `<div class="row">${num('ntp.gmt', 'GMT offset (h)')}${num('ntp.ms', 'Print every (ms)', 'step="100"')}</div><div class="row">${chk('ntp.disconnect', 'Turn WiFi off after sync')}</div>` : ''}`, c.ntp.on ? 'ntp' : '');
 
-  const outs = c.web.outputs.map((o, i) => `<div class="item" data-block="web-out-${i}"><div class="item-head"><b style="font-size:13px">Button ${i + 1}</b>${codeBtn('web-out-' + i)}</div><div class="row">${num(`web.outputs.${i}.pin`, `Output ${i + 1} pin`, PIN_ATTR)}${chk(`web.outputs.${i}.low`, 'Active LOW')}<button class="btn ghost small" data-act="del:web.outputs:${i}">Remove</button></div></div>`).join('');
+  const outs = c.web.outputs.map((o, i) => `<div class="item" data-block="web-out-${i}"><div class="item-head"><b style="font-size:13px">Button ${i + 1}</b>${codeBtn('web-out-' + i)}</div><div class="row">${num(`web.outputs.${i}.pin`, `Output ${i + 1} pin`, PIN_ATTR)}<label class="f">Name on page<input type="text" id="${fid(`web.outputs.${i}.label`)}" data-p="web.outputs.${i}.label" value="${esc(o.label || '')}" placeholder="GPIO ${esc(o.pin)}" spellcheck="false" autocomplete="off" style="width:110px"></label><button class="btn ghost small" data-act="del:web.outputs:${i}">Remove</button></div><div class="row">${chk(`web.outputs.${i}.low`, 'Active LOW')}</div></div>`).join('');
   h += sec('web', 'Web server', c.web.on, c.web.on ? `${c.web.outputs.length} buttons${c.web.pot ? ' · pot' : ''}` : '', `${chk('web.on', '<b>Host a web page on port 80</b>')}
     ${c.web.on ? `<div class="row">${txt('web.title', 'Page heading')}</div>
+    ${c.web.outputs.length ? `<div class="row">${sel('web.btnStyle', 'Buttons for each output', [['toggle', 'One button that flips ON / OFF'], ['both', 'Separate ON and OFF buttons']], true)}</div>` : ''}
     ${outs}<div class="row"><button class="btn small" data-act="addOut">+ ON/OFF button for an output</button></div>
     ${c.web.outputs.length ? `<div class="item" data-block="web-alloff"><div class="item-head">${chk('web.allOff', '<b>ALL OFF button</b> (link <code>/all/off</code>)')}${c.web.allOff ? codeBtn('web-alloff') : ''}</div></div>` : ''}
     <div class="item" data-block="web-table"><div class="item-head"><b style="font-size:13px">Sensor table</b>${c.web.pot || c.web.volt || c.web.touch || c.web.btn || c.web.uptime ? codeBtn('web-table') : ''}</div>
@@ -2274,7 +2334,10 @@ function renderWebPreview(simOnly) {
     else if (k === 'table') inner = `<table><tr><th>Sensor</th><th>Value</th></tr>${rows.map((rk, j) => `<tr><td>${esc(rowHtml[rk][0])}</td><td>${esc(rowHtml[rk][1])}</td>${rmv(rk, j, rows.length)}</tr>`).join('')}</table>`;
     else {
       const o = outs.find(x => 'out-' + x.pin === k); const st = pvState[o.pin] ? 'on' : 'off';
-      inner = `<p>GPIO ${o.pin} - State ${st}</p><p><button type="button" class="pv-btn${st === 'on' ? ' off' : ''}" data-pv="${o.pin}">${st === 'on' ? 'OFF' : 'ON'}</button></p>`;
+      const nm = esc(String(o.label || '').trim() || 'GPIO ' + o.pin);
+      inner = c.web.btnStyle === 'both'
+        ? `<p>${nm} - State ${st}</p><p><button type="button" class="pv-btn" data-pv="${o.pin}" data-pvset="on">ON</button><button type="button" class="pv-btn off" data-pv="${o.pin}" data-pvset="off">OFF</button></p>`
+        : `<p>${nm} - State ${st}</p><p><button type="button" class="pv-btn${st === 'on' ? ' off' : ''}" data-pv="${o.pin}">${st === 'on' ? 'OFF' : 'ON'}</button></p>`;
     }
     body += `<div class="pv-item">${inner}${mv(k, i, ord.length)}</div>`;
   });
@@ -2312,7 +2375,7 @@ $('#b-web').addEventListener('click', e => {
   }
   if (pv) {
     const pin = +pv.dataset.pv, idx = cfg.web.outputs.findIndex(o => +o.pin === pin), o = cfg.web.outputs[idx];
-    pvState[pin] = !pvState[pin];
+    pvState[pin] = pv.dataset.pvset ? pv.dataset.pvset === 'on' : !pvState[pin];
     const st = pvState[pin] ? 'on' : 'off';
     pvPath = `/${pin}/${st}`;
     renderWebPage();
@@ -2360,7 +2423,7 @@ controls.addEventListener('click', e => {
   } else if (act === 'del') {
     getP(cfg, path).splice(+idx, 1);
   } else if (act === 'addOut') {
-    cfg.web.outputs.push({ pin: nextPin(usedPins()), low: false });
+    cfg.web.outputs.push({ pin: nextPin(usedPins()), low: false, label: 'LED' + (cfg.web.outputs.length + 1) });
   } else if (act === 'addRoute') {
     const m = cfg.mqtt;
     const base = /\/[#+]$/.test(m.subTopic) ? m.subTopic.replace(/\/[#+]$/, '') : m.subTopic.split('/').slice(0, -1).join('/') || m.subTopic;
